@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 11: Secrets in ETCD - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 11: Secrets in ETCD</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks7262</code>
+              </p>
+
+              <p class="card-text">
+                There is an existing Secret called database-access in Namespace
+                team-green.
+              </p>
+
+              <p class="card-text">Tasks:</p>
+              <ol>
+                <li>
+                  Read the complete Secret content directly from ETCD (using
+                  etcdctl) and store it into /opt/course/11/etcd-secret-content
+                  on cks7262
+                </li>
+                <li>
+                  Write the plain and decoded Secret's value of key "pass" into
+                  /opt/course/11/database-password on cks7262
+                </li>
+              </ol>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Use <code>sudo -i</code> to become root which may be required
+                for this question
+              </div>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Access ETCD</h5>
+                <p>
+                  First, let's connect to the control plane node and check
+                  etcdctl:
+                </p>
+
+                <pre><code>➜ ssh cks7262
+
+➜ candidate@cks7262:~# sudo -i
+
+➜ root@cks7262:~# etcdctl
+NAME:
+   etcdctl - A simple command line client for etcd.
+
+WARNING:
+   Environment variable ETCDCTL_API is not set; defaults to etcdctl v2.
+   Set environment variable ETCDCTL_API=3 to use v3 API or ETCDCTL_API=2 to use v2 API.
+
+USAGE:
+   etcdctl [global options] command [command options] [arguments...]
+...
+   --cert-file value   identify HTTPS client using this SSL certificate file
+   --key-file value    identify HTTPS client using this SSL key file
+   --ca-file value     verify certificates of HTTPS-enabled servers using this CA bundle
+...</code></pre>
+
+                <p>
+                  Let's find the necessary certificate files by checking the
+                  kube-apiserver configuration:
+                </p>
+
+                <pre><code>➜ root@cks7262:~# cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep etcd
+    - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
+    - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+    - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
+    - --etcd-servers=https://127.0.0.1:2379</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Read Secret from ETCD</h5>
+                <p>Now we can query ETCD for the secret value:</p>
+
+                <pre><code>➜ root@cks7262:~# ETCDCTL_API=3 etcdctl \
+--cert /etc/kubernetes/pki/apiserver-etcd-client.crt \
+--key /etc/kubernetes/pki/apiserver-etcd-client.key \
+--cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/team-green/database-access</code></pre>
+
+                <p>The output should be saved to the required location:</p>
+
+                <pre><code># cks7262:/opt/course/11/etcd-secret-content
+
+/registry/secrets/team-green/database-access
+k8s
+
+
+v1Secret
+
+database-access
+team-green"*$a01ef408-0a40-4fee-bd26-7adf346b3d222bB
+0kubectl.kubernetes.io/last-applied-configuration{"apiVersion":"v1","data":{"pass":"Y29uZmlkZW50aWFs"},"kind":"Secret","metadata":{"annotations":{},"name":"database-access","namespace":"team-green"}}
+
+kubectl-client-side-applyUpdatevFieldsV1:
+{"f:data":{".":{},"f:pass":{}},"f:metadata":{"f:annotations":{".":{},"f:kubectl.kubernetes.io/last-applied-configuration":{}}},"f:type":{}}B
+pass
+    confidentialOpaque"</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Decode Secret Value</h5>
+                <p>
+                  From the ETCD output, we can see the base64-encoded value for
+                  the "pass" key. Let's decode it:
+                </p>
+
+                <pre><code>➜ root@cks7262:~# echo Y29uZmlkZW50aWFs | base64 -d > /opt/course/11/database-password
+
+➜ root@cks7262:~# cat /opt/course/11/database-password
+confidential</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                The secret has been successfully retrieved and decoded:
+                <ul>
+                  <li>
+                    The complete secret content has been read from ETCD and
+                    saved
+                  </li>
+                  <li>
+                    The "pass" key value has been decoded from base64 and saved
+                  </li>
+                  <li>The decoded value is "confidential"</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

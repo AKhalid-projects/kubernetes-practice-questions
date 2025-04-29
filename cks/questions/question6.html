@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 6: Verify Platform Binaries - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 6: Verify Platform Binaries</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks3477</code>
+              </p>
+
+              <p class="card-text">
+                There are four Kubernetes server binaries located at
+                <code>/opt/course/6/binaries</code> on cks3477. You're provided
+                with the following verified sha512 values for these:
+              </p>
+
+              <pre><code>kube-apiserver f417c0555bc0167355589dd1afe23be9bf909bf98312b1025f12015d1b58a1c62c9908c0067a7764fa35efdac7016a9efa8711a44425dd6692906a7c283f032c
+
+kube-controller-manager 60100cc725e91fe1a949e1b2d0474237844b5862556e25c2c655a33boa8225855ec5ee22fa4927e6c46a60d43a7c4403a27268f96fbb726307d1608b44f38a60
+
+kube-proxy 52f9d8ad045f8eee1d689619ef8ceef2d86d50c75a6a332653240d7ba5b2a114aca056d9e513984ade24358c9662714973c1960c62a5cb37dd375631c8a614c6
+
+kubelet 4be40f2440619e990897cf956c32800dc96c2c983bf64519854a3309fa5aa21827991559f9c44595098e27e6f2ee4d64a3fdec6baba8a177881f20e3ec61e26c</code></pre>
+
+              <p class="card-text">
+                Delete those binaries that don't match with the sha512 values
+                above.
+              </p>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Check Binary Files</h5>
+                <pre><code>➜ ssh cks3477 
+➜ candidate@cks3477:~# cd /opt/course/6/binaries
+➜ candidate@cks3477:/opt/course/6/binaries$ ls
+kube-apiserver  kube-controller-manager  kube-proxy  kubelet</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Verify SHA512 Checksums</h5>
+                <p>Check kube-apiserver:</p>
+                <pre><code>➜ candidate@cks3477:/opt/course/6/binaries$ sha512sum kube-apiserver 
+f417c0555bc0167355589dd1afe23be9bf909bf98312b1025f12015d1b58a1c62c9908c0067a7764fa35efdac7016a9efa8711a44425dd6692906a7c283f032c  kube-apiserver</code></pre>
+
+                <p>Check kube-controller-manager:</p>
+                <pre><code>➜ candidate@cks3477:/opt/course/6/binaries$ sha512sum kube-controller-manager
+60100cc725e91fe1a949e1b2d0474237844b5862556e25c2c655a33b0a8225855ec5ee22fa4927e6c46a60d43a7c4403a27268f96fbb726307d1608b44f38a60  kube-controller-manager</code></pre>
+
+                <p>Check kube-proxy:</p>
+                <pre><code>➜ candidate@cks3477:/opt/course/6/binaries$ sha512sum kube-proxy
+52f9d8ad045f8eee1d689619ef8ceef2d86d50c75a6a332653240d7ba5b2a114aca056d9e513984ade24358c9662714973c1960c62a5cb37dd375631c8a614c6  kube-proxy</code></pre>
+
+                <p>Check kubelet:</p>
+                <pre><code>➜ candidate@cks3477:/opt/course/6/binaries$ sha512sum kubelet
+7b720598e6a3483b45c537b57d759e3e82bc5c53b3274f681792f62e941019cde3d51a7f9b55158abf3810d506146bc0aa7cf97b36f27f341028a54431b335be  kubelet</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Compare Controller Manager Hash</h5>
+                <p>Let's compare the controller manager hash more carefully:</p>
+                <pre><code>➜ candidate@cks3477:/opt/course/6/binaries$ sha512sum kube-controller-manager > compare
+➜ candidate@cks3477:/opt/course/6/binaries$ vim compare 
+# cks3477:/opt/course/6/binaries/compare
+60100cc725e91fe1a949e1b2d0474237844b5862556e25c2c655a33b0a8225855ec5ee22fa4927e6c46a60d43a7c4403a27268f96fbb726307d1608b44f38a60  
+60100cc725e91fe1a949e1b2d0474237844b5862556e25c2c655a33boa8225855ec5ee22fa4927e6c46a60d43a7c4403a27268f96fbb726307d1608b44f38a60</code></pre>
+
+                <p>Check for differences:</p>
+                <pre><code>➜ candidate@cks3477:/opt/course/6/binaries$ cat compare | uniq
+60100cc725e91fe1a949e1b2d0474237844b5862556e25c2c655a33b0a8225855ec5ee22fa4927e6c46a60d43a7c4403a27268f96fbb726307d1608b44f38a60
+60100cc725e91fe1a949e1b2d0474237844b5862556e25c2c655a33boa8225855ec5ee22fa4927e6c46a60d43a7c4403a27268f96fbb726307d1608b44f38a60</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 4: Delete Invalid Binaries</h5>
+                <p>
+                  Based on the checksum verification, we need to delete kubelet
+                  and kube-controller-manager:
+                </p>
+                <pre><code>➜ candidate@cks3477:/opt/course/6/binaries$ rm kubelet kube-controller-manager</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                The kube-controller-manager binary had a single character
+                difference in its hash (0 vs o), and the kubelet binary had a
+                completely different hash.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

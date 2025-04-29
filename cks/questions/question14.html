@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 14: Syscall Activity - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 14: Syscall Activity</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks7262</code>
+              </p>
+
+              <p class="card-text">
+                There are Pods in Namespace team-yellow. A security investigation noticed that some processes running in these Pods are using the Syscall kill, which is forbidden by an internal policy of Team Yellow.
+              </p>
+
+              <p class="card-text">Tasks:</p>
+              <ol>
+                <li>Find the offending Pod(s) that are using the forbidden kill syscall</li>
+                <li>Remove these by reducing the replicas of the parent Deployment to 0</li>
+              </ol>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                You can connect to the worker nodes using <code>ssh cks7262-node1</code> and <code>ssh cks7262-node2</code> from cks7262.
+              </div>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Check Pod Distribution</h5>
+                <p>First, let's check which nodes the Pods are running on:</p>
+
+                <pre><code>➜ ssh cks7262
+
+➜ candidate@cks7262:~# k -n team-yellow get pod -owide
+NAME                             ...       NODE               NOMINATED NODE   ...
+collector1-8d9dbc99f-hswfn       ...       cks7262-node1   <none>           <none>
+collector1-8d9dbc99f-kwjtf       ...       cks7262-node1   <none>           <none>
+collector2-66547ddfb5-5mvtz      ...       cks7262-node1   <none>           <none>
+collector3-6ffb899c79-kwcxv      ...       cks7262-node1   <none>           <none>
+collector3-6ffb899c79-lxm79      ...       cks7262-node1   <none>           <none></code></pre>
+
+                <p>All Pods are running on cks7262-node1, so we'll focus our investigation there.</p>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Investigate collector1 Processes</h5>
+                <p>Let's check the processes for the first Deployment collector1:</p>
+
+                <pre><code>➜ candidate@cks7262:~# ssh cks7262-node1
+
+➜ candidate@cks7262-node1:~# sudo -i
+
+➜ root@cks7262-node1:~# crictl pods --name collector1
+POD ID              CREATED             STATE        NAME                         ...
+a61e29997e607       17 minutes ago      Ready        collector1-8d9dbc99f-kwjtf   ...
+8b0c315bf5ccd       17 minutes ago      Ready        collector1-8d9dbc99f-hswfn   ...
+
+➜ root@cks7262-node1:~# crictl ps --pod a61e29997e607
+CONTAINER ID        IMAGE            ...    POD ID          POD
+e18e766d288ac       71136cb0add32    ...    a61e29997e607   collector1-8d9dbc99f-kwjtf
+
+➜ root@cks7262-node1:~# crictl inspect e18e766d288ac | grep args -A1
+        "args": [
+          "./collector1-process"</code></pre>
+
+                <p>Let's check the process PIDs:</p>
+
+                <pre><code>➜ root@cks7262-node1:~# ps aux | grep collector1-process
+root       13980  0.0  0.0 702216   384 ?   ...    ./collector1-process
+root       14079  0.0  0.0 702216   512 ?   ...    ./collector1-process</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Check Syscalls for collector1</h5>
+                <p>Using strace to monitor syscalls:</p>
+
+                <pre><code>➜ root@cks7262-node1:~# strace -p 14079
+strace: Process 14079 attached
+epoll_pwait(3, [], 128, 529, NULL, 1)   = 0
+epoll_pwait(3, [], 128, 995, NULL, 1)   = 0
+epoll_pwait(3, [], 128, 999, NULL, 1)   = 0
+...
+futex(0x4d7e68, FUTEX_WAIT_PRIVATE, 0, NULL) = 0
+kill(666, SIGTERM)                      = -1 ESRCH (No such process)
+futex(0x4d7e68, FUTEX_WAIT_PRIVATE, 0, NULL) = 0
+kill(666, SIGTERM)                      = -1 ESRCH (No such process)
+--- SIGURG {si_signo=SIGURG, si_code=SI_TKILL, si_pid=1, si_uid=0} ---</code></pre>
+
+                <p>Found it! The collector1 process is using the forbidden kill syscall.</p>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 4: Verify Other Deployments</h5>
+                <p>Let's check collector2 and collector3 to ensure they're not using the forbidden syscall:</p>
+
+                <pre><code>➜ root@cks7262-node1:~# ps aux | grep collector2-process
+root       14046  0.0  0.0 702224   512 ?        Ssl  10:55   0:00 ./collector2-process
+
+➜ root@cks7262-node1:~# strace -p 14046
+strace: Process 14046 attached
+futex(0x4d9e68, FUTEX_WAIT_PRIVATE, 0, NULL) = 0
+futex(0x4d9e68, FUTEX_WAIT_PRIVATE, 0, NULL) = 0
+epoll_pwait(3, [], 128, 999, NULL, 1)   = 0
+...</code></pre>
+
+                <pre><code>➜ root@cks7262-node1:~# ps aux | grep collector3-process
+root       14013  0.0  0.0 702480   640 ?        Ssl  10:55   0:00 ./collector3-process
+root       14216  0.0  0.0 702480   640 ?        Ssl  10:55   0:00 ./collector3-process
+
+➜ root@cks7262-node1:~# strace -p 14013
+strace: Process 14013 attached
+epoll_pwait(3, [], 128, 762, NULL, 1)   = 0
+epoll_pwait(3, [], 128, 999, NULL, 1)   = 0
+...</code></pre>
+
+                <p>Both collector2 and collector3 are clean - they don't use the kill syscall.</p>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 5: Scale Down Offending Deployment</h5>
+                <p>Scale down the collector1 Deployment to 0 replicas:</p>
+
+                <pre><code>➜ root@cks7262:~# k -n team-yellow scale deploy collector1 --replicas 0</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Summary of findings:
+                <ul>
+                  <li>Found that collector1 processes were using the forbidden kill syscall</li>
+                  <li>Verified that collector2 and collector3 were not using the forbidden syscall</li>
+                  <li>Successfully scaled down the collector1 Deployment to 0 replicas</li>
+                </ul>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Security Note: Syscalls are used by processes running in Userspace to communicate with the Linux Kernel. It's important to restrict syscalls for container processes using tools like Seccomp or AppArmor to enhance security.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html> 

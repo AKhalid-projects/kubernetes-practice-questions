@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CKS Practice Questions</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      .question-link {
+        display: block;
+        color: #2c3e50;
+        text-decoration: none;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+      }
+      .question-link:last-child {
+        border-bottom: none;
+      }
+      .question-link:hover {
+        color: #3498db;
+        text-decoration: none;
+      }
+      .question-link i {
+        margin-right: 0.5rem;
+        color: #3498db;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .section-title {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #3498db;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- CKS Tips Section -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">CKS Tips Kubernetes 1.32</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="section-title">Exam Preparation Resources</h5>
+              <a href="tips/cks-tips.html" class="question-link">
+                <i class="fas fa-book"></i>
+                CKS Tips and Best Practices
+              </a>
+            </div>
+          </div>
+
+          <!-- Questions Section -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Practice Questions</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="section-title">Security Fundamentals</h5>
+              <a href="questions/question1.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 1: Pod Security Policies
+              </a>
+              <a href="questions/question2.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 2: Network Policies
+              </a>
+              <a href="questions/question3.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 3: RBAC Implementation
+              </a>
+
+              <h5 class="section-title mt-4">Container Security</h5>
+              <a href="questions/question4.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 4: Container Runtime Security
+              </a>
+              <a href="questions/question5.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 5: Image Scanning
+              </a>
+              <a href="questions/question6.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 6: Pod Security Standards
+              </a>
+
+              <h5 class="section-title mt-4">Cluster Hardening</h5>
+              <a href="questions/question7.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 7: KubeletConfiguration
+              </a>
+              <a href="questions/question8.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 8: API Server Security
+              </a>
+              <a href="questions/question9.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 9: etcd Security
+              </a>
+
+              <h5 class="section-title mt-4">Monitoring and Logging</h5>
+              <a href="questions/question10.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 10: Audit Logging
+              </a>
+              <a href="questions/question11.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 11: Falco Rules
+              </a>
+              <a href="questions/question12.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 12: Sysdig Monitoring
+              </a>
+
+              <h5 class="section-title mt-4">Supply Chain Security</h5>
+              <a href="questions/question13.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 13: Image Signing
+              </a>
+              <a href="questions/question14.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 14: Syscall Activity
+              </a>
+              <a href="questions/question15.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 15: Supply Chain Security
+              </a>
+
+              <h5 class="section-title mt-4">Advanced Security</h5>
+              <a href="questions/question16.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 16: Admission Controllers
+              </a>
+              <a href="questions/question17.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 17: OPA Policies
+              </a>
+              <a href="questions/question18.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 18: Software Bill Of Materials
+              </a>
+              <a href="questions/question19.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 19: Immutable Root FileSystem
+              </a>
+              <a href="questions/question20.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 20: Security Contexts
+              </a>
+
+              <h5 class="section-title mt-4">Incident Response</h5>
+              <a href="questions/question21.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 21: Security Incident Response
+              </a>
+              <a href="questions/question22.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 22: Forensics Analysis
+              </a>
+              <a href="questions/question23.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 23: Security Remediation
+              </a>
+              <a href="questions/question24.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 24: RBAC Implementation
+              </a>
+              <a href="questions/question25.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 25: Audit Log Analysis
+              </a>
+              <a href="questions/question26.html" class="question-link">
+                <i class="fas fa-shield-alt"></i>
+                Question 26: Malicious Process Detection
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  </body>
+</html>

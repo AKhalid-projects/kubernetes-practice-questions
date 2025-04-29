@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question 8: CiliumNetworkPolicy - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Highlight.js for code syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .navbar {
+            background-color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+        }
+        .container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+        .back-link:hover {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .back-link i {
+            margin-right: 0.5rem;
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        .solution-step {
+            margin-bottom: 1.5rem;
+        }
+        .solution-step:last-child {
+            margin-bottom: 0;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../cks.html">
+                <i class="fas fa-shield-alt me-2"></i>
+                CKS Practice Questions
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Question Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Question 8: CiliumNetworkPolicy</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Problem Statement</h5>
+                        <p class="card-text">Solve this question on: <code>ssh cks7262</code></p>
+
+                        <p class="card-text">In Namespace team-orange a Default-Allow strategy for all Namespace-internal traffic was chosen. There is an existing CiliumNetworkPolicy default-allow which assures this and which should not be altered. That policy also allows cluster internal DNS resolution.</p>
+
+                        <p class="card-text">Now it's time to deny and authenticate certain traffic. Create 3 CiliumNetworkPolicies in Namespace team-orange to implement the following requirements:</p>
+
+                        <h6>Create a Layer 3 policy named p1 to:</h6>
+                        <ul>
+                            <li>Deny outgoing traffic from Pods with label type=messenger to Pods behind Service database</li>
+                        </ul>
+
+                        <h6>Create a Layer 4 policy named p2 to:</h6>
+                        <ul>
+                            <li>Deny outgoing ICMP traffic from Deployment transmitter to Pods behind Service database</li>
+                        </ul>
+
+                        <h6>Create a Layer 3 policy named p3 to:</h6>
+                        <ul>
+                            <li>Enable Mutual Authentication for outgoing traffic from Pods with label type=database to Pods with label type=messenger</li>
+                        </ul>
+
+                        <div class="note">
+                            <i class="fas fa-info-circle me-2"></i>
+                            All Pods in the Namespace run plain Nginx images with open port 80. This allows simple connectivity tests like: <code>k -n team-orange exec POD_NAME -- curl database</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solution Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Solution</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="solution-step">
+                            <h5>Step 1: Overview</h5>
+                            <p>First, let's examine the existing resources in Namespace team-orange:</p>
+
+                            <pre><code>➜ ssh cks7262 
+
+➜ candidate@cks7262:~$ k -n team-orange get pod --show-labels -owide
+NAME                         ...     IP           ...   LABELS
+database-0                   ...   10.244.2.13    ...   ...,type=database
+messenger-57f557cd65-rhzd7   ...   10.244.1.126   ...   ...,type=messenger
+messenger-57f557cd65-xcqwz   ...   10.244.2.70    ...   ...,type=messenger
+transmitter-866696fc57-6ccgr ...   10.244.1.152   ...   ...,type=transmitter
+transmitter-866696fc57-d8qk4 ...   10.244.2.214   ...   ...,type=transmitter
+
+➜ candidate@cks7262:~$ k -n team-orange get svc,ep
+NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+service/database   ClusterIP   10.108.172.58   <none>        80/TCP    8m29s
+
+NAME                 ENDPOINTS        AGE
+endpoints/database   10.244.2.13:80   8m29s</code></pre>
+
+                            <p>This is the existing default-allow policy:</p>
+
+                            <pre><code>apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-allow
+  namespace: team-orange
+spec:
+  endpointSelector:
+    matchLabels: {}             # Apply this policy to all Pods in Namespace team-orange 
+  egress:
+  - toEndpoints:
+    - {}                        # ALLOW egress to all Pods in Namespace team-orange
+  - toEndpoints:              
+      - matchLabels:
+          io.kubernetes.pod.namespace: kube-system
+          k8s-app: kube-dns
+    toPorts:
+      - ports:
+          - port: "53"
+            protocol: UDP
+        rules:
+          dns:
+            - matchPattern: "*"
+  ingress:
+  - fromEndpoints:              # ALLOW ingress from all Pods in Namespace team-orange
+    - {}</code></pre>
+
+                            <p>CiliumNetworkPolicies behave like vanilla NetworkPolicies: once one egress rule exists, all other egress is forbidden. This is also the case for egressDeny rules: once one egressDeny rule exists, all other egress is also forbidden, unless allowed by an egress rule. This is why a Default-Allow policy like this one is necessary in this scenario. The behaviour explained above for egress is also the case for ingress.</p>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 2: Policy 1 - Layer 3 Policy</h5>
+                            <p>First, let's check the current connectivity from a type=messenger Pod to the Service database:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ k -n team-orange exec messenger-57f557cd65-rhzd7 -- curl -m 2 database
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+...</code></pre>
+
+                            <p>Now, let's create the first policy to deny this traffic:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ vim 8_p1.yaml
+# cks7262:~/8_p1.yaml
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: p1
+  namespace: team-orange
+spec:
+  endpointSelector:
+    matchLabels:
+      type: messenger
+  egressDeny:
+  - toEndpoints:
+    - matchLabels:
+        type: database  # we use the label of the Pods behind the Service "database"
+
+➜ candidate@cks7262:~$ k -f 8_p1.yaml apply
+ciliumnetworkpolicy.cilium.io/p1 created</code></pre>
+
+                            <p>Let's verify the policy works by testing connectivity:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ k -n team-orange exec messenger-57f557cd65-rhzd7 -- curl -m 2 --head database
+curl: (28) Resolving timed out after 2002 milliseconds
+command terminated with exit code 28</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 3: Policy 2 - Layer 4 Policy</h5>
+                            <p>First, let's verify that ICMP currently works:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ k -n team-orange exec transmitter-866696fc57-6ccgr -- ping 10.244.2.13
+PING 10.244.2.13 (10.244.2.13): 56 data bytes
+64 bytes from 10.244.2.13: seq=0 ttl=63 time=2.555 ms
+64 bytes from 10.244.2.13: seq=1 ttl=63 time=0.102 ms
+...</code></pre>
+
+                            <p>Now, let's create the second policy to deny ICMP traffic:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ vim 8_p2.yaml
+# cks7262:~/8_p2.yaml
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: p2
+  namespace: team-orange
+spec:
+  endpointSelector:
+    matchLabels:
+      type: transmitter
+  egressDeny:
+  - toEndpoints:
+    - matchLabels:
+        type: database
+    icmps:
+    - fields:
+      - type: 8
+        family: IPv4
+      - type: EchoRequest
+        family: IPv6
+
+➜ candidate@cks7262:~$ k -f 8_p2.yaml apply
+ciliumnetworkpolicy.cilium.io/p2 created</code></pre>
+
+                            <p>Let's verify the policy works:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ k -n team-orange exec transmitter-866696fc57-6ccgr -- ping -w 2 10.244.2.13
+PING 10.244.2.13 (10.244.2.13): 56 data bytes
+
+--- 10.244.2.13 ping statistics ---
+2 packets transmitted, 0 packets received, 100% packet loss
+command terminated with exit code 1</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 4: Policy 3 - Mutual Authentication</h5>
+                            <p>Let's create the final policy to enable mutual authentication:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ vim 8_p3.yaml
+# cks7262:~/8_p3.yaml
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: p3
+  namespace: team-orange
+spec:
+  endpointSelector:
+    matchLabels:
+      type: database
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        type: messenger
+    authentication:
+      mode: "required"     # Enable Mutual Authentication
+
+➜ candidate@cks7262:~$ k -f 8_p3.yaml apply
+ciliumnetworkpolicy.cilium.io/p3 created</code></pre>
+
+                            <p>Let's verify all policies are in place:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ k -n team-orange get cnp
+NAME            AGE
+default-allow   126m
+p1              11m
+p2              11m
+p3              8s</code></pre>
+                        </div>
+
+                        <div class="note">
+                            <i class="fas fa-info-circle me-2"></i>
+                            The policies have been successfully implemented:
+                            <ul>
+                                <li>Policy p1 denies outgoing traffic from messenger Pods to database Pods</li>
+                                <li>Policy p2 denies ICMP traffic from transmitter Pods to database Pods</li>
+                                <li>Policy p3 enables mutual authentication for traffic from database Pods to messenger Pods</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="../cks.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Questions List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="container text-center">
+            <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+    </script>
+</body>
+</html> 

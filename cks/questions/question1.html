@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 1: Contexts - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 1: Contexts</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks3477</code>
+              </p>
+
+              <p class="card-text">
+                You have access to multiple clusters from your main terminal
+                through kubectl contexts. Write all context names into
+                <code>/opt/course/1/contexts</code> on cks3477, one per line.
+              </p>
+
+              <p class="card-text">
+                From the kubeconfig extract the certificate of user
+                <code>restricted@infra-prod</code> and write it decoded to
+                <code>/opt/course/1/cert</code>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Get Context Names</h5>
+                <p>The fastest way is to run:</p>
+                <pre><code>➜ ssh cks3477
+➜ candidate@cks3477:~$ k config get-contexts # copy by hand
+➜ candidate@cks3477:~$ k config get-contexts -o name > /opt/course/1/contexts</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Alternative Method Using JSONPath</h5>
+                <pre><code>k config view -o jsonpath="{.contexts[*].name}"
+k config view -o jsonpath="{.contexts[*].name}" | tr " " "\n" # new lines
+k config view -o jsonpath="{.contexts[*].name}" | tr " " "\n" > /opt/course/1/contexts</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Expected Output</h5>
+                <pre><code># cks3477:/opt/course/1/contexts
+gianna@infra-prod
+infra-prod
+restricted@infra-prod</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 4: Extract Certificate</h5>
+                <p>For the certificate we could just run:</p>
+                <pre><code>k config view --raw</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 5: Extract Specific User Certificate</h5>
+                <pre><code>k config view --raw -ojsonpath="{.users[2].user.client-certificate-data}" | base64 -d > /opt/course/1/cert</code></pre>
+                <p>Or even more specifically:</p>
+                <pre><code>k config view --raw -ojsonpath="{.users[?(.name == 'restricted@infra-prod')].user.client-certificate-data}" | base64 -d > /opt/course/1/cert</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 6: Certificate Content</h5>
+                <pre><code># cks3477:/opt/course/1/cert
+-----BEGIN CERTIFICATE-----
+MIIDHzCCAgegAwIBAgIQN5Qe/Rj/PhaqckEI23LPnjANBgkqhkiG9w0BAQsFADAV
+MRMwEQYDVQQDEwprdWJlcm5ldGVzMB4XDTIwMDkyNjIwNTUwNFoXDTIxMDkyNjIw
+NTUwNFowKjETMBEGA1UEChMKcmVzdHJpY3RlZDETMBEGA1UEAxMKcmVzdHJpY3Rl
+ZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL/Jaf/QQdijyJTWIDij
+qa5p4oAh+xDBX3jR9R0G5DkmPU/FgXjxej3rTwHJbuxg7qjTuqQbf9Fb2AHcVtwH
+gUjC12ODUDE+nVtap+hCe8OLHZwH7BGFWWscgInZOZW2IATK/YdqyQL5OKpQpFkx
+iAknVZmPa2DTZ8FoyRESboFSTZj6y+JVA7ot0pM09jnxswstal9GZLeqioqfFGY6
+YBO/Dg4DDsbKhqfUwJVT6Ur3ELsktZIMTRS5By4Xz18798eBiFAHvgJGq1TTwuPM
+EhBfwYwgYbalL8DSHeFrelLBKgciwUKjr1lolnnuc1vhkX1peV1J3xrf6o2KkyMc
+lY0CAwEAAaNWMFQwDgYDVR0PAQH/BAQDAgWgMBMGA1UdJQQMMAoGCCsGAQUFBwMC
+MAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUPrspZIWR7YMN8vT5DF3s/LvpxPQw
+DQYJKoZIhvcNAQELBQADggEBAIDq0Zt77gXI1s+uW46zBw4mIWgAlBLl2QqCuwmV
+kd86eH5bD0FCtWlb6vGdcKPdFccHh8Z6z2LjjLu6UoiGUdIJaALhbYNJiXXi/7cf
+M7sqNOxpxQ5X5hyvOBYD1W7d/EzPHV/lcbXPUDYFHNqBYs842LWSTlPQioDpupXp
+FFUQPxsenNXDa4TbmaRvnK2jka0yXcqdiXuIteZZovp/IgNkfmx2Ld4/Q+Xlnscf
+CFtWbjRa/0W/3EW/ghQ7xtC7bgcOHJesoiTZPCZ+dfKuUfH6d1qxgj6Jwt0HtyEf
+QTQSc66BdMLnw5DMObs4lXDo2YE6LvMrySdXm/S7img5YzU=
+-----END CERTIFICATE-----</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

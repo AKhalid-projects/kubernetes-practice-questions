@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question 2: Runtime Security with Falco - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Highlight.js for code syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .navbar {
+            background-color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+        }
+        .container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+        .back-link:hover {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .back-link i {
+            margin-right: 0.5rem;
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        .solution-step {
+            margin-bottom: 1.5rem;
+        }
+        .solution-step:last-child {
+            margin-bottom: 0;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../cks.html">
+                <i class="fas fa-shield-alt me-2"></i>
+                CKS Practice Questions
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Question Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Question 2: Runtime Security with Falco</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Problem Statement</h5>
+                        <p class="card-text">Solve this question on: <code>ssh cks7262</code></p>
+                        
+                        <p class="card-text">Falco is installed on worker node cks7262-node1. Connect using <code>ssh cks7262-node1</code> from cks7262. There is file <code>/etc/falco/rules.d/falco_custom.yaml</code> with rules that help you to:</p>
+                        
+                        <ol>
+                            <li>Find a Pod running image httpd which modifies /etc/passwd.</li>
+                            <li>Scale the Deployment that controls that Pod down to 0.</li>
+                            <li>Find a Pod running image nginx which triggers rule "Package management process launched".</li>
+                            <li>Change the rule log text after "Package management process launched" to only include:
+                                <ul>
+                                    <li>time-with-nanoseconds</li>
+                                    <li>container-id</li>
+                                    <li>container-name</li>
+                                    <li>user-name</li>
+                                </ul>
+                            </li>
+                            <li>Collect the logs for at least 20 seconds and save them under <code>/opt/course/2/falco.log</code> on cks7262.</li>
+                            <li>Scale the Deployment that controls that Pod down to 0.</li>
+                        </ol>
+
+                        <div class="note">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Use <code>sudo -i</code> to become root which may be required for this question
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solution Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Solution</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="solution-step">
+                            <h5>Step 1: Investigate Falco Configuration</h5>
+                            <pre><code>➜ ssh cks7262
+➜ candidate@cks7262:~$ ssh cks7262-node1
+➜ candidate@cks7262-node1:~$ sudo -i
+➜ root@cks7262-node1:~# cd /etc/falco
+➜ root@cks7262-node1:/etc/falco# ls -lh
+total 132K
+drwxr-xr-x 2 root root 4.0K Aug 19 13:18 config.d
+-rw-r--r-- 1 root root  53K Sep  7 10:04 falco.yaml
+-rw-r--r-- 1 root root   21 Aug 19 12:57 falco_rules.local.yaml
+-rw-r--r-- 1 root root  63K Jan  1  1970 falco_rules.yaml
+drwxr-xr-x 2 root root 4.0K Aug 19 13:18 rules.d</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 2: Find httpd Pod Modifying /etc/passwd</h5>
+                            <pre><code>➜ root@cks7262-node1:~# falco -U | grep httpd
+Sat Sep  7 12:39:04 2024: Falco version: 0.38.2 (x86_64)
+...
+12:58:32.430165207: Warning Sensitive file opened for reading by non-trusted program (file=/etc/passwd gparent=containerd-shim ggparent=systemd gggparent=<NA> evt_type=open user=root user_uid=0 user_loginuid=-1 process=sed proc_exepath=/bin/busybox parent=sh command=sed -i $d /etc/passwd terminal=0 container_id=f86cd629e71c container_name=httpd)</code></pre>
+
+                            <p>Find the Pod and scale down:</p>
+                            <pre><code>➜ root@cks7262-node1:~# crictl ps -id f86cd629e71c
+CONTAINER ID    IMAGE          NAME  ...   POD ID         POD
+f86cd629e71c4   f6b40f9f8ad71  httpd ...   cab6dafd045d5  rating-service-5c8f54bd77-bgkh6
+
+➜ root@cks7262-node1:~# crictl pods -id cab6dafd045d5
+POD ID          CREATED       ...   NAME                              NAMESPACE    ... 
+cab6dafd045d5   3 hours ago   ...   rating-service-5c8f54bd77-bgkh6   team-purple  ...
+
+➜ root@cks7262-node1:~# k get pod -A | grep rating-service
+team-purple     rating-service-5c8f54bd77-bgkh6             1/1     Running     0   ...
+
+➜ root@cks7262-node1:~# k -n team-purple scale deploy rating-service --replicas 0
+deployment.apps/rating-service scaled</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 3: Find nginx Pod and Update Falco Rule</h5>
+                            <pre><code>➜ root@cks7262-node1:~# falco -U | grep 'Package management process launched'
+...
+13:10:46.307338039: Error Package management process launched (user=root user_loginuid=-1 command=apk container_id=65338e61dc48 container_name=nginx image=docker.io/library/nginx:1.19.2-alpine)</code></pre>
+
+                            <p>Update the Falco rule in <code>/etc/falco/rules.d/falco_custom.yaml</code>:</p>
+                            <pre><code># cks7262-node1:/etc/falco/rules.d/falco_custom.yaml
+- rule: Launch Package Management Process in Container
+  desc: Package management process ran inside container
+  condition: >
+    spawned_process
+    and container
+    and user.name != "_apt"
+    and package_mgmt_procs
+    and not package_mgmt_ancestor_procs
+  output: >
+    Package management process launched %evt.time,%container.id,%container.name,%user.name
+  priority: ERROR
+  tags: [process, mitre_persistence]</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 4: Collect Logs</h5>
+                            <pre><code>➜ root@cks7262-node1:~# falco -U | grep 'Package management process launched'
+...
+13:31:26.364958758: Error Package management process launched 13:31:26.364958758,65338e61dc48,nginx,root
+13:31:31.356117694: Error Package management process launched 13:31:31.356117694,65338e61dc48,nginx,root
+13:31:36.329307852: Error Package management process launched 13:31:36.329307852,65338e61dc48,nginx,root
+...</code></pre>
+
+                            <p>Save logs to file:</p>
+                            <pre><code># cks7262:/opt/course/2/falco.log
+13:31:26.364958758: Error Package management process launched 13:31:26.364958758,65338e61dc48,nginx,root
+13:31:31.356117694: Error Package management process launched 13:31:31.356117694,65338e61dc48,nginx,root
+13:31:36.329307852: Error Package management process launched 13:31:36.329307852,65338e61dc48,nginx,root
+13:31:41.338988597: Error Package management process launched 13:31:41.338988597,65338e61dc48,nginx,root
+13:31:46.329154755: Error Package management process launched 13:31:46.329154755,65338e61dc48,nginx,root
+13:31:51.308124986: Error Package management process launched 13:31:51.308124986,65338e61dc48,nginx,root
+13:31:56.358522188: Error Package management process launched 13:31:56.358522188,65338e61dc48,nginx,root
+13:32:01.360834976: Error Package management process launched 13:32:01.360834976,65338e61dc48,nginx,root
+13:32:06.327657274: Error Package management process launched 13:32:06.327657274,65338e61dc48,nginx,root
+13:32:11.342534392: Error Package management process launched 13:32:11.342534392,65338e61dc48,nginx,root
+13:32:16.343746448: Error Package management process launched 13:32:16.343746448,65338e61dc48,nginx,root
+13:32:21.303524240: Error Package management process launched 13:32:21.303524240,65338e61dc48,nginx,root
+13:32:26.330027622: Error Package management process launched 13:32:26.330027622,65338e61dc48,nginx,root
+13:32:31.364716844: Error Package management process launched 13:32:31.364716844,65338e61dc48,nginx,root</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 5: Scale Down nginx Deployment</h5>
+                            <pre><code>➜ candidate@cks7262:~# k get pod -A | grep webapi
+team-blue       webapi-5499fdc5db-k4c7c                     1/1     Running      ...
+
+➜ candidate@cks7262:~$ k -n team-blue scale deploy webapi --replicas 0
+deployment.apps/webapi scaled</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="../cks.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Questions List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="container text-center">
+            <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+</html> 

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kubernetes Certification Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .cert-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+      }
+      .cert-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1.5rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      .cert-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+      .cert-description {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+      }
+      .cert-link {
+        display: inline-block;
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      .cert-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .cert-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .cert-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #3498db;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <i class="fas fa-certificate me-2"></i>
+          Kubernetes Certification Practice
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <h2 class="text-center mb-4">Choose Your Certification Path</h2>
+          <p class="text-center text-muted mb-5">
+            Select a certification to access practice questions and study
+            materials
+          </p>
+        </div>
+      </div>
+
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        <!-- CKA Card -->
+        <div class="col">
+          <div class="cert-card">
+            <div class="card-header">
+              <h4 class="mb-0">Certified Kubernetes Administrator (CKA)</h4>
+            </div>
+            <div class="card-body text-center">
+              <i class="fas fa-shield-alt cert-icon"></i>
+              <h5 class="cert-title">Administrator Certification</h5>
+              <p class="cert-description">
+                Master the skills needed to build, configure, and maintain
+                Kubernetes clusters. Learn about cluster architecture,
+                installation, configuration, and management.
+              </p>
+              <a href="cka/cka.html" class="cert-link">
+                <i class="fas fa-arrow-right"></i>
+                Start CKA Practice
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- CKAD Card -->
+        <div class="col">
+          <div class="cert-card">
+            <div class="card-header">
+              <h4 class="mb-0">
+                Certified Kubernetes Application Developer (CKAD)
+              </h4>
+            </div>
+            <div class="card-body text-center">
+              <i class="fas fa-code cert-icon"></i>
+              <h5 class="cert-title">Application Developer Certification</h5>
+              <p class="cert-description">
+                Focus on designing, building, and deploying cloud-native
+                applications. Learn about application design, deployment, and
+                troubleshooting.
+              </p>
+              <a href="ckad/ckad.html" class="cert-link">
+                <i class="fas fa-arrow-right"></i>
+                Start CKAD Practice
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- CKS Card -->
+        <div class="col">
+          <div class="cert-card">
+            <div class="card-header">
+              <h4 class="mb-0">
+                Certified Kubernetes Security Specialist (CKS)
+              </h4>
+            </div>
+            <div class="card-body text-center">
+              <i class="fas fa-lock cert-icon"></i>
+              <h5 class="cert-title">Security Specialist Certification</h5>
+              <p class="cert-description">
+                Master Kubernetes security best practices. Learn about cluster
+                hardening, supply chain security, and runtime security.
+              </p>
+              <a href="cks/cks.html" class="cert-link">
+                <i class="fas fa-arrow-right"></i>
+                Start CKS Practice
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Resources -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Additional Resources</h4>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <h5>Official Documentation</h5>
+                  <ul class="list-unstyled">
+                    <li>
+                      <a href="https://kubernetes.io/docs" class="cert-link"
+                        >Kubernetes Documentation</a
+                      >
+                    </li>
+                    <li>
+                      <a
+                        href="https://github.com/cncf/curriculum"
+                        class="cert-link"
+                        >CNCF Curriculum</a
+                      >
+                    </li>
+                    <li>
+                      <a
+                        href="https://docs.linuxfoundation.org/tc-docs/certification/lf-handbook2"
+                        class="cert-link"
+                        >Linux Foundation Handbook</a
+                      >
+                    </li>
+                  </ul>
+                </div>
+                <div class="col-md-4">
+                  <h5>Practice Environments</h5>
+                  <ul class="list-unstyled">
+                    <li>
+                      <a href="https://killercoda.com" class="cert-link"
+                        >Killer.sh</a
+                      >
+                    </li>
+                    <li>
+                      <a
+                        href="https://kubernetes.io/docs/tutorials/kubernetes-basics/"
+                        class="cert-link"
+                        >Kubernetes Basics</a
+                      >
+                    </li>
+                    <li>
+                      <a
+                        href="https://kubernetes.io/docs/tasks/"
+                        class="cert-link"
+                        >Kubernetes Tasks</a
+                      >
+                    </li>
+                  </ul>
+                </div>
+                <div class="col-md-4">
+                  <h5>Community Resources</h5>
+                  <ul class="list-unstyled">
+                    <li>
+                      <a href="https://kubernetes.io/blog" class="cert-link"
+                        >Kubernetes Blog</a
+                      >
+                    </li>
+                    <li>
+                      <a
+                        href="https://kubernetes.io/community"
+                        class="cert-link"
+                        >Kubernetes Community</a
+                      >
+                    </li>
+                    <li>
+                      <a href="https://kubernetes.io/events" class="cert-link"
+                        >Kubernetes Events</a
+                      >
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">Kubernetes Certification Practice &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 18: SBOM - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 18: SBOM</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks8930</code>
+              </p>
+
+              <p class="card-text">
+                Your team received Software Bill Of Materials (SBOM) requests
+                and you have been selected to generate some documents and scans:
+              </p>
+
+              <p class="card-text">Tasks:</p>
+              <ol>
+                <li>
+                  Using bom:
+                  <ul>
+                    <li>
+                      Generate a SPDX-Json SBOM of image
+                      registry.k8s.io/kube-apiserver:v1.31.0
+                    </li>
+                    <li>Store it at /opt/course/18/sbom1.json on cks8930</li>
+                  </ul>
+                </li>
+                <li>
+                  Using trivy:
+                  <ul>
+                    <li>
+                      Generate a CycloneDX SBOM of image
+                      registry.k8s.io/kube-controller-manager:v1.31.0
+                    </li>
+                    <li>Store it at /opt/course/18/sbom2.json on cks8930</li>
+                  </ul>
+                </li>
+                <li>
+                  Using trivy:
+                  <ul>
+                    <li>
+                      Scan the existing SPDX-Json SBOM at
+                      /opt/course/18/sbom_check.json on cks8930 for known
+                      vulnerabilities
+                    </li>
+                    <li>
+                      Save the result in Json format at
+                      /opt/course/18/sbom_check_result.json on cks8930
+                    </li>
+                  </ul>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Create SBOM with Bom</h5>
+                <p>First, let's check the bom tool's capabilities:</p>
+
+                <pre><code>➜ ssh cks8930
+
+➜ candidate@cks8930:~$ bom
+bom (Bill of Materials)
+...
+Usage:
+  bom [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  document    bom document → Work with SPDX documents
+  generate    bom generate → Create SPDX SBOMs
+  help        Help about any command
+  validate    bom validate → Check artifacts against an sbom
+  version     Prints the version
+  ...</code></pre>
+
+                <p>Generate the SPDX-Json SBOM for the kube-apiserver image:</p>
+
+                <pre><code>➜ candidate@cks8930:~$ bom generate --image registry.k8s.io/kube-apiserver:v1.31.0 --format json --output /opt/course/18/sbom1.json
+INFO bom v0.6.0: Generating SPDX Bill of Materials 
+INFO Processing image reference: registry.k8s.io/kube-apiserver:v1.31.0 
+INFO Reference registry.k8s.io/kube-apiserver:v1.31.0 points to an index 
+INFO Reference image index points to 4 manifests  
+INFO Adding image registry.k8s.io/kube-apiserver@sha256:64c595846c29945f619a1c3d420a8bfac87e93cb8d3641e222dd9ac412284001 (amd64/linux) 
+...</code></pre>
+
+                <p>Verify the generated SBOM:</p>
+
+                <pre><code>➜ candidate@cks8930:~$ vim /opt/course/18/sbom1.json
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "SBOM-SPDX-4b2df9c5-0526-471a-88d4-72cd41408f6e",
+  "spdxVersion": "SPDX-2.3",
+  "creationInfo": {
+    "created": "2024-09-10T16:27:49Z",
+    "creators": [
+      "Tool: bom-v0.6.0"
+    ],
+    "licenseListVersion": "3.21"
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://spdx.org/spdxdocs/k8s-releng-bom-5389c436-97e9-448c-95b0-bceaa602b4c0",
+  "documentDescribes": [
+    "SPDXRef-Package-sha256-470179274deb9dc3a81df55cfc24823ce153147d4ebf2ed649a4f271f51eaddf"
+  ],
+  "packages": [
+    {
+      ...
+    }
+  ]
+}</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Create SBOM with Trivy</h5>
+                <p>
+                  First, let's check trivy's capabilities for SBOM generation:
+                </p>
+
+                <pre><code>➜ candidate@cks8930:~$ trivy image --help | grep format
+  $ trivy image --format json --output result.json alpine:3.15
+  # Generate a report in the CycloneDX format
+  $ trivy image --format cyclonedx --output result.cdx alpine:3.15
+  -f, --format string              format (table,json,template,sarif,cyclonedx,spdx,spdx-json,github,cosign-vuln) (default "table")</code></pre>
+
+                <p>
+                  Generate the CycloneDX SBOM for the kube-controller-manager
+                  image:
+                </p>
+
+                <pre><code>➜ candidate@cks8930:~$ trivy image --format cyclonedx --output /opt/course/18/sbom2.json registry.k8s.io/kube-controller-manager:v1.31.0
+2024-09-10T16:20:21Z    INFO    "--format cyclonedx" disables security scanning. Specify "--scanners vuln" explicitly if you want to include vulnerabilities in the CycloneDX report.
+2024-09-10T16:20:24Z    INFO    Detected OS     family="debian" version="12.5"
+2024-09-10T16:20:24Z    INFO    Number of language-specific files       num=2</code></pre>
+
+                <p>Verify the generated SBOM:</p>
+
+                <pre><code>➜ candidate@cks8930:~$ vim /opt/course/18/sbom2.json
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:70b535ca-0033-47aa-8648-27095d982eca",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-09-10T16:20:24+00:00",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "group": "aquasecurity",
+          "name": "trivy",
+          "version": "0.51.2"
+        }
+      ]
+    },
+    ...
+  }
+}</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Scan SBOM with Trivy</h5>
+                <p>Scan the existing SPDX-Json SBOM for vulnerabilities:</p>
+
+                <pre><code>➜ candidate@cks8930:~$ trivy sbom --format json --output /opt/course/18/sbom_check_result.json /opt/course/18/sbom_check.json
+2024-09-10T16:50:56Z    INFO    Need to update DB
+2024-09-10T16:50:56Z    INFO    Downloading DB...       repository="ghcr.io/aquasecurity/trivy-db:2"
+52.89 MiB / 52.89 MiB [---------------------------------------------------------------------------------------------------------------------] 100.00% 9.90 MiB p/s 5.5s
+2024-09-10T16:51:02Z    INFO    Vulnerability scanning is enabled
+2024-09-10T16:51:02Z    INFO    Detected SBOM format    format="spdx-json"
+2024-09-10T16:51:03Z    INFO    Detected OS     family="debian" version="11.8"
+2024-09-10T16:51:03Z    INFO    [debian] Detecting vulnerabilities...   os_version="11" pkg_num=3
+2024-09-10T16:51:03Z    INFO    Number of language-specific files       num=6
+2024-09-10T16:51:03Z    INFO    [gobinary] Detecting vulnerabilities...</code></pre>
+
+                <p>Verify the scan results:</p>
+
+                <pre><code>➜ candidate@cks8930:~$ vim /opt/course/18/sbom_check_result.json
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2024-09-10T16:51:03.311963768Z",
+  "ArtifactName": "/opt/course/18/sbom_check.json",
+  "ArtifactType": "spdx",
+  "Metadata": {
+    "OS": {
+      "Family": "debian",
+      "Name": "11.8"
+    },
+    "ImageConfig": {
+      "architecture": "",
+      "created": "0001-01-01T00:00:00Z",
+      "os": "",
+      "rootfs": {
+        "type": "",
+        "diff_ids": null
+      },
+      "config": {}
+    }
+  },
+  "Results": [
+    {
+      ...
+    }
+  ]
+}</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Summary of tasks completed:
+                <ul>
+                  <li>Generated SPDX-Json SBOM for kube-apiserver using bom</li>
+                  <li>
+                    Generated CycloneDX SBOM for kube-controller-manager using
+                    trivy
+                  </li>
+                  <li>
+                    Scanned existing SPDX-Json SBOM for vulnerabilities using
+                    trivy
+                  </li>
+                  <li>Saved all results in the required locations</li>
+                </ul>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Security Note: SBOMs are crucial for software supply chain
+                security. They provide transparency about the components and
+                dependencies in your software, making it easier to identify and
+                address security vulnerabilities.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

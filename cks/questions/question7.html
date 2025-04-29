@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 7: KubeletConfiguration - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 7: KubeletConfiguration</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks8930</code>
+              </p>
+
+              <p class="card-text">
+                You're asked to update the cluster's KubeletConfiguration.
+                Implement the following changes in the Kubeadm way that ensures
+                new Nodes added to the cluster will receive the changes too:
+              </p>
+
+              <ul>
+                <li>Set containerLogMaxSize to 5Mi</li>
+                <li>Set containerLogMaxFiles to 3</li>
+              </ul>
+
+              <p class="card-text">Apply the changes for the Kubelet on:</p>
+              <ul>
+                <li>cks8930</li>
+                <li>
+                  cks8930-node1 (Connect with
+                  <code>ssh cks8930-node1</code> from cks8930)
+                </li>
+              </ul>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Use <code>sudo -i</code> to become root which may be required
+                for this question
+              </div>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Update Kubelet-Config ConfigMap</h5>
+                <p>
+                  A cluster created with Kubeadm will have a ConfigMap named
+                  kubelet-config in Namespace kube-system. This ConfigMap will
+                  be used if new Nodes are added to the cluster.
+                </p>
+
+                <pre><code>➜ ssh cks8930 
+
+➜ candidate@cks8930:~# k -n kube-system edit cm kubelet-config
+# kubectl -n kube-system edit cm kubelet-config
+apiVersion: v1
+data:
+  kubelet: |
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    kind: KubeletConfiguration
+    ...
+    volumeStatsAggPeriod: 0s
+    containerLogMaxSize: 5Mi
+    containerLogMaxFiles: 3
+kind: ConfigMap
+metadata:
+  name: kubelet-config
+  namespace: kube-system
+...</code></pre>
+
+                <p>
+                  Above we can see that we simply added the two new arguments to
+                  data.kubelet.
+                </p>
+                <p>
+                  A new Node added to the cluster, both control plane and
+                  worker, would use this KubeletConfiguration containing the
+                  changes. That KubeletConfiguration from the ConfigMap will
+                  also be used during a kubeadm upgrade.
+                </p>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Update Control Plane Kubelet-Config</h5>
+                <p>
+                  To find the Kubelet-Config path we can check the Kubelet
+                  process:
+                </p>
+
+                <pre><code>➜ candidate@cks8930:~# sudo -i
+
+➜ root@cks8930:~# ps aux | grep kubelet
+root        7418  2.0  4.8 1927756 98748 ?       Ssl  11:38   1:56 /usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --config=/var/lib/kubelet/config.yaml
+...</code></pre>
+
+                <p>
+                  Above we see it's specified via the argument
+                  --config=/var/lib/kubelet/config.yaml. We could also check the
+                  Kubeadm config for the Kubelet:
+                </p>
+
+                <pre><code>➜ root@cks8930:~# find / | grep kubeadm
+/var/lib/dpkg/info/kubeadm.md5sums
+/var/lib/dpkg/info/kubeadm.list
+/var/lib/kubelet/kubeadm-flags.env
+/usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+...
+
+➜ root@cks8930:~# cat /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+# Note: This dropin only works with kubeadm and kubelet v1.11+
+[Service]
+Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+...</code></pre>
+
+                <p>
+                  Above we see the argument --config being set. And we should
+                  see that our changes are still missing in that file:
+                </p>
+
+                <pre><code>➜ root@cks8930:~# grep containerLog /var/lib/kubelet/config.yaml
+
+➜ root@cks8930:~#</code></pre>
+
+                <p>We go ahead and download the latest Kubelet-Config:</p>
+
+                <pre><code>➜ root@cks8930:~# kubeadm upgrade node phase kubelet-config
+[upgrade] Reading configuration from the cluster...
+[upgrade] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -o yaml'
+[upgrade] Backing up kubelet config file to /etc/kubernetes/tmp/kubeadm-kubelet-config1186317096/config.yaml
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[upgrade] The configuration for this node was successfully updated!
+[upgrade] Now you should go ahead and upgrade the kubelet package using your package manager.
+
+➜ root@cks8930:~# grep containerLog /var/lib/kubelet/config.yaml
+containerLogMaxFiles: 3
+containerLogMaxSize: 5Mi</code></pre>
+
+                <p>Now we just need to restart the Kubelet:</p>
+
+                <pre><code>➜ root@cks8930:~# service kubelet restart</code></pre>
+
+                <p>We can verify the changes:</p>
+
+                <pre><code>➜ root@cks8930:~# kubectl get --raw "/api/v1/nodes/cks8930/proxy/configz" | jq
+...
+    "containerLogMaxSize": "5Mi",
+    "containerLogMaxFiles": 3,
+...</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Update Worker Node Kubelet-Config</h5>
+                <p>
+                  We should see that the existing Kubelet-Config on the worker
+                  node is still unchanged:
+                </p>
+
+                <pre><code>➜ root@cks8930:~# ssh cks8930-node1
+
+➜ root@cks8930-node1:~# grep containerLog /var/lib/kubelet/config.yaml
+
+➜ root@cks8930-node1:~#</code></pre>
+
+                <p>So we go ahead and apply the updates:</p>
+
+                <pre><code>➜ root@cks8930-node1:~# kubeadm upgrade node phase kubelet-config
+[upgrade] Reading configuration from the cluster...
+[upgrade] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -o yaml'
+[upgrade] Backing up kubelet config file to /etc/kubernetes/tmp/kubeadm-kubelet-config948054586/config.yaml
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[upgrade] The configuration for this node was successfully updated!
+[upgrade] Now you should go ahead and upgrade the kubelet package using your package manager.
+
+➜ root@cks8930-node1:~# grep containerLog /var/lib/kubelet/config.yaml
+containerLogMaxFiles: 3
+containerLogMaxSize: 5Mi
+
+➜ root@cks8930-node1:~# service kubelet restart</code></pre>
+
+                <p>And verify the changes:</p>
+
+                <pre><code>➜ root@cks8930-node1:~# kubectl get --raw "/api/v1/nodes/cks8930-node1/proxy/configz" | jq
+...
+    "containerLogMaxSize": "5Mi",
+    "containerLogMaxFiles": 3,
+...</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                The changes have been applied to both nodes and will be used for
+                any new nodes added to the cluster.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 24: RBAC Implementation - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 24: RBAC Implementation</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks3477</code>
+              </p>
+
+              <p class="card-text">
+                You're asked to implement some RBAC for user gianna:
+              </p>
+
+              <ol>
+                <li>
+                  Confirm or restrict existing cluster-level RBAC resources to
+                  ensure user gianna can never read Secret contents cluster-wide
+                </li>
+                <li>
+                  Create additional RBAC resources to allow user gianna to
+                  create Pods and Deployments in Namespaces security, restricted
+                  and internal
+                </li>
+              </ol>
+
+              <p class="card-text">To test your RBAC you can:</p>
+              <ul>
+                <li>
+                  Switch to the other context with:
+                  <code>k config use-context gianna@infra-prod</code>
+                </li>
+                <li>
+                  Switch back to the default context with:
+                  <code>k config use-context kubernetes-admin@kubernetes</code>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Check Existing RBAC Rules</h5>
+                <p>
+                  First, let's examine the existing RBAC resources for user
+                  gianna:
+                </p>
+
+                <pre><code>➜ ssh cks3477
+
+➜ candidate@cks3477:~# k get clusterrolebinding -oyaml | grep gianna -A10 -B20</code></pre>
+
+                <p>We find the binding is named 'gianna'. Let's examine it:</p>
+
+                <pre><code>➜ candidate@cks3477:~# k edit clusterrolebinding gianna
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gianna
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gianna
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: gianna</code></pre>
+
+                <p>Let's check the associated ClusterRole:</p>
+
+                <pre><code>➜ candidate@cks3477:~# k edit clusterrole gianna
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gianna
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - configmaps
+  - pods
+  - namespaces
+  verbs:
+  - list</code></pre>
+
+                <p>Test the current permissions:</p>
+
+                <pre><code>➜ candidate@cks3477:~# k auth can-i list secrets --as gianna
+yes
+
+➜ candidate@cks3477:~# k auth can-i get secrets --as gianna
+no</code></pre>
+
+                <p>
+                  However, we discover that listing secrets can expose their
+                  contents:
+                </p>
+
+                <pre><code>➜ candidate@cks3477:~# k config use-context gianna@infra-prod
+➜ candidate@cks3477:~# k -n security get secrets -oyaml | grep password
+    password: ekhHYW5lQUVTaVVxCg==
+    password: bWdFVlBSdEpEWHBFCg==</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Restrict Secret Access</h5>
+                <p>Remove the ability to list secrets from the ClusterRole:</p>
+
+                <pre><code>➜ candidate@cks3477:~# k config use-context kubernetes-admin@kubernetes
+➜ candidate@cks3477:~# k edit clusterrole gianna
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gianna
+rules:
+- apiGroups:
+  - ""
+  resources:
+  #- secrets         # REMOVED
+  - configmaps
+  - pods
+  - namespaces
+  verbs:
+  - list</code></pre>
+
+                <p>Verify the changes:</p>
+
+                <pre><code>➜ candidate@cks3477:~# k auth can-i list secrets --as gianna
+no
+
+➜ candidate@cks3477:~# k auth can-i get secrets --as gianna
+no</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Create Additional RBAC Rules</h5>
+                <p>Create a new ClusterRole for Pod and Deployment creation:</p>
+
+                <pre><code>➜ candidate@cks3477:~# k create clusterrole gianna-additional --verb=create --resource=pods --resource=deployments
+clusterrole.rbac.authorization.k8s.io/gianna-additional created</code></pre>
+
+                <p>Create RoleBindings in each namespace:</p>
+
+                <pre><code>➜ candidate@cks3477:~# k -n security create rolebinding gianna-additional \
+--clusterrole=gianna-additional --user=gianna
+
+➜ candidate@cks3477:~# k -n restricted create rolebinding gianna-additional \
+--clusterrole=gianna-additional --user=gianna
+
+➜ candidate@cks3477:~# k -n internal create rolebinding gianna-additional \
+--clusterrole=gianna-additional --user=gianna</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 4: Verify New Permissions</h5>
+                <p>Test the new permissions:</p>
+
+                <pre><code>➜ candidate@cks3477:~# k -n default auth can-i create pods --as gianna
+no
+
+➜ candidate@cks3477:~# k -n security auth can-i create pods --as gianna
+yes
+
+➜ candidate@cks3477:~# k -n restricted auth can-i create pods --as gianna
+yes
+
+➜ candidate@cks3477:~# k -n internal auth can-i create pods --as gianna
+yes</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Summary of changes:
+                <ul>
+                  <li>
+                    Removed secret listing permission to prevent content
+                    exposure
+                  </li>
+                  <li>
+                    Created new ClusterRole for Pod and Deployment creation
+                  </li>
+                  <li>Created RoleBindings in three namespaces</li>
+                  <li>Verified permissions are correctly applied</li>
+                </ul>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Security Note: When implementing RBAC, always follow the
+                principle of least privilege. Be especially careful with
+                permissions that might indirectly expose sensitive information,
+                such as listing resources that contain secrets.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

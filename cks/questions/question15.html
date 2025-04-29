@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 15: Configure TLS on Ingress - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 15: Configure TLS on Ingress</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks7262</code>
+              </p>
+
+              <p class="card-text">
+                In Namespace team-pink there is an existing Nginx Ingress resources named secure which accepts two paths /app and /api which point to different ClusterIP Services.
+              </p>
+
+              <p class="card-text">
+                From your main terminal you can connect to it using for example:
+              </p>
+
+              <pre><code>HTTP: curl -v http://secure-ingress.test:31080/app
+HTTPS: curl -kv https://secure-ingress.test:31443/app</code></pre>
+
+              <p class="card-text">
+                Right now it uses a default generated TLS certificate by the Nginx Ingress Controller.
+              </p>
+
+              <p class="card-text">
+                You're asked to instead use the key and certificate provided at /opt/course/15/tls.key and /opt/course/15/tls.crt. As it's a self-signed certificate you need to use curl -k when connecting to it.
+              </p>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Investigate Current Setup</h5>
+                <p>First, let's check the current Ingress configuration and verify the endpoints:</p>
+
+                <pre><code>➜ ssh cks7262
+
+➜ candidate@cks7262:~# k -n team-pink get ing secure 
+NAME     CLASS    HOSTS                 ADDRESS          PORTS   AGE
+secure   <none>   secure-ingress.test   192.168.100.12   80      7m11s
+
+➜ candidate@cks7262:~# ping secure-ingress.test
+PING cks7262-node1 (192.168.100.12) 56(84) bytes of data.
+64 bytes from cks7262-node1 (192.168.100.12): icmp_seq=1 ttl=64 time=0.316 ms</code></pre>
+
+                <p>Let's test the HTTP endpoints:</p>
+
+                <pre><code>➜ candidate@cks7262:~# curl http://secure-ingress.test:31080/app
+This is the backend APP!
+
+➜ candidate@cks7262:~# curl http://secure-ingress.test:31080/api
+This is the API Server!</code></pre>
+
+                <p>Now let's check the current HTTPS setup:</p>
+
+                <pre><code>➜ candidate@cks7262:~# curl -kv https://secure-ingress.test:31443/api
+...
+* Server certificate:
+*  subject: O=Acme Co; CN=Kubernetes Ingress Controller Fake Certificate
+*  start date: Sep  8 10:55:34 2024 GMT
+*  expire date: Sep  8 10:55:34 2025 GMT
+*  issuer: O=Acme Co; CN=Kubernetes Ingress Controller Fake Certificate
+*  SSL certificate verify result: self-signed certificate (18), continuing anyway.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+...</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Create TLS Secret</h5>
+                <p>Create a Secret using the provided key and certificate:</p>
+
+                <pre><code>➜ candidate@cks7262:~# cd /opt/course/15
+
+➜ candidate@cks7262:/opt/course/15$ ls
+tls.crt  tls.key
+
+➜ candidate@cks7262:/opt/course/15$ k -n team-pink create secret tls tls-secret --key tls.key --cert tls.crt
+secret/tls-secret created</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Update Ingress Configuration</h5>
+                <p>Backup the current Ingress configuration and update it to use the new TLS Secret:</p>
+
+                <pre><code>➜ candidate@cks7262:~# k -n team-pink get ing secure -oyaml > 15_ing_bak.yaml
+
+➜ candidate@cks7262:~# k -n team-pink edit ing secure</code></pre>
+
+                <p>Add the following TLS configuration to the Ingress spec:</p>
+
+                <pre><code>apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ...
+  generation: 1
+  name: secure
+  namespace: team-pink
+spec:
+  tls:                            # add
+    - hosts:                      # add
+      - secure-ingress.test       # add
+      secretName: tls-secret      # add
+  rules:
+  - host: secure-ingress.test
+    http:
+      paths:
+      - backend:
+          service:
+            name: secure-app
+            port: 80
+        path: /app
+        pathType: ImplementationSpecific
+      - backend:
+          service:
+            name: secure-api
+            port: 80
+        path: /api
+        pathType: ImplementationSpecific</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 4: Verify the Changes</h5>
+                <p>Check the updated Ingress configuration:</p>
+
+                <pre><code>➜ candidate@cks7262:~# k -n team-pink get ing
+NAME     CLASS    HOSTS                 ADDRESS          PORTS     AGE
+secure   <none>   secure-ingress.test   192.168.100.12   80, 443   25m</code></pre>
+
+                <p>Test the HTTPS endpoint with the new certificate:</p>
+
+                <pre><code>➜ candidate@cks7262:~# curl -k https://secure-ingress.test:31443/api
+This is the API Server!
+
+➜ candidate@cks7262:~# curl -kv https://secure-ingress.test:31443/api
+...
+* Server certificate:
+*  subject: CN=secure-ingress.test; O=secure-ingress.test
+*  start date: Sep 25 18:22:10 2020 GMT
+*  expire date: Sep 20 18:22:10 2040 GMT
+*  issuer: CN=secure-ingress.test; O=secure-ingress.test
+*  SSL certificate verify result: self-signed certificate (18), continuing anyway.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+...</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Summary of changes:
+                <ul>
+                  <li>Created a TLS Secret using the provided key and certificate</li>
+                  <li>Updated the Ingress configuration to use the new TLS Secret</li>
+                  <li>Verified that the Ingress is now using the custom certificate</li>
+                  <li>Confirmed that both HTTP and HTTPS endpoints are working</li>
+                </ul>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Security Note: While we're using a self-signed certificate for this exercise, in a production environment, you should use a certificate from a trusted Certificate Authority (CA) to ensure proper security.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html> 

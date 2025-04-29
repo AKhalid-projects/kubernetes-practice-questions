@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 16: Docker Image Attack Surface - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 16: Docker Image Attack Surface</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks7262</code>
+              </p>
+
+              <p class="card-text">
+                There is a Deployment image-verify in Namespace team-blue which runs image registry.killer.sh:5000/image-verify:v1. DevSecOps has asked you to improve this image by:
+              </p>
+
+              <ul>
+                <li>Changing the base image to alpine:3.12</li>
+                <li>Not installing curl</li>
+                <li>Updating nginx to use the version constraint >=1.18.0</li>
+                <li>Running the main process as user myuser</li>
+              </ul>
+
+              <p class="card-text">
+                Do not add any new lines to the Dockerfile, just edit existing ones. The file is located at /opt/course/16/image/Dockerfile.
+              </p>
+
+              <p class="card-text">
+                Tag your version as v2. You can build, tag and push using:
+              </p>
+
+              <pre><code>cd /opt/course/16/image
+podman build -t registry.killer.sh:5000/image-verify:v2 .
+podman run registry.killer.sh:5000/image-verify:v2 # to test your changes
+podman push registry.killer.sh:5000/image-verify:v2</code></pre>
+
+              <p class="card-text">
+                Make the Deployment use your updated image tag v2.
+              </p>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Ensure to run podman as user candidate and not root
+              </div>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Examine Current Dockerfile</h5>
+                <p>First, let's look at the current Dockerfile and make a backup:</p>
+
+                <pre><code>➜ ssh cks7262
+
+➜ candidate@cks7262:~# cd /opt/course/16/image
+
+➜ candidate@cks7262:/opt/course/16/image$ cp Dockerfile Dockerfile.bak
+
+➜ candidate@cks7262:/opt/course/16/image$ cat Dockerfile
+FROM alpine:3.4
+RUN apk update && apk add vim curl nginx=1.10.3-r0
+RUN addgroup -S myuser && adduser -S myuser -G myuser
+COPY ./run.sh run.sh
+RUN ["chmod", "+x", "./run.sh"]
+USER root
+ENTRYPOINT ["/bin/sh", "./run.sh"]</code></pre>
+
+                <p>Let's also check the run.sh script:</p>
+
+                <pre><code>➜ candidate@cks7262:/opt/course/16/image$ cat run.sh
+while true; do date; id; echo; sleep 1; done</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Update Dockerfile</h5>
+                <p>Update the Dockerfile according to the requirements:</p>
+
+                <pre><code># /opt/course/16/image/Dockerfile
+FROM alpine:3.12
+RUN apk update && apk add vim nginx>=1.18.0
+RUN addgroup -S myuser && adduser -S myuser -G myuser
+COPY ./run.sh run.sh
+RUN ["chmod", "+x", "./run.sh"]
+USER myuser
+ENTRYPOINT ["/bin/sh", "./run.sh"]</code></pre>
+
+                <p>Changes made:
+                  <ul>
+                    <li>Changed base image to alpine:3.12</li>
+                    <li>Removed curl from apk add</li>
+                    <li>Updated nginx version constraint to >=1.18.0</li>
+                    <li>Changed USER from root to myuser</li>
+                  </ul>
+                </p>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Build and Test the New Image</h5>
+                <p>Build the new image with tag v2:</p>
+
+                <pre><code>➜ candidate@cks7262:/opt/course/16/image$ podman build -t registry.killer.sh:5000/image-verify:v2 .
+STEP 1/7: FROM alpine:3.12
+Resolved "alpine" as an alias (/etc/containers/registries.conf.d/shortnames.conf)
+Trying to pull docker.io/library/alpine:3.12...
+Getting image source signatures
+Copying blob 1b7ca6aea1dd done   | 
+Copying config 24c8ece58a done   | 
+Writing manifest to image destination
+STEP 2/7: RUN apk update && apk add vim nginx>=1.18.0
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/main/x86_64/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/community/x86_64/APKINDEX.tar.gz
+v3.12.12-52-g800c17231ad [http://dl-cdn.alpinelinux.org/alpine/v3.12/main]
+v3.12.12-52-g800c17231ad [http://dl-cdn.alpinelinux.org/alpine/v3.12/community]
+OK: 12767 distinct packages available
+--> 87781619777d
+STEP 3/7: RUN addgroup -S myuser && adduser -S myuser -G myuser
+--> ae553aeea607
+STEP 4/7: COPY ./run.sh run.sh
+--> 943d90848b52
+STEP 5/7: RUN ["chmod", "+x", "./run.sh"]
+--> 224656b3ddd8
+STEP 6/7: USER myuser
+--> 48de19088ba3
+STEP 7/7: ENTRYPOINT ["/bin/sh", "./run.sh"]
+COMMIT registry.killer.sh:5000/image-verify:v2
+--> 09516fa460aa
+Successfully tagged registry.killer.sh:5000/image-verify:v2</code></pre>
+
+                <p>Test the new image locally:</p>
+
+                <pre><code>➜ candidate@cks7262:/opt/course/16/image$ podman run registry.killer.sh:5000/image-verify:v2
+Sun Sep  8 12:11:30 UTC 2024
+uid=101(myuser) gid=102(myuser) groups=102(myuser)
+
+Sun Sep  8 12:11:31 UTC 2024
+uid=101(myuser) gid=102(myuser) groups=102(myuser)
+
+Sun Sep  8 12:11:32 UTC 2024
+uid=101(myuser) gid=102(myuser) groups=102(myuser)</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 4: Push the New Image</h5>
+                <p>Push the new image to the registry:</p>
+
+                <pre><code>➜ candidate@cks7262:/opt/course/16/image$ podman push registry.killer.sh:5000/image-verify:v2
+Getting image source signatures
+Copying blob 6a1c1a1200d3 done   | 
+Copying blob fd5841c2ff0f done   | 
+Copying blob 761b8fb2b1d2 skipped: already exists  
+Copying blob aed9d43cb02e done   | 
+Copying blob 1ad27bdd166b done   | 
+Copying config 09516fa460 done   | 
+Writing manifest to image destination</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 5: Update the Deployment</h5>
+                <p>Update the Deployment to use the new image:</p>
+
+                <pre><code>➜ candidate@cks7262:~# k -n team-blue edit deploy image-verify</code></pre>
+
+                <p>Change the image tag from v1 to v2:</p>
+
+                <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+...
+spec:
+...
+  template:
+...
+    spec:
+      containers:
+      - image: registry.killer.sh:5000/image-verify:v2 # change</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 6: Verify the Changes</h5>
+                <p>Check the Pod logs to verify the process is running as myuser:</p>
+
+                <pre><code>➜ candidate@cks7262:~# k -n team-blue logs -f -l id=image-verify
+Sun Sep  8 12:13:12 UTC 2024
+uid=101(myuser) gid=102(myuser) groups=102(myuser)
+
+Sun Sep  8 12:13:13 UTC 2024
+uid=101(myuser) gid=102(myuser) groups=102(myuser)
+
+Sun Sep  8 12:13:14 UTC 2024
+uid=101(myuser) gid=102(myuser) groups=102(myuser)</code></pre>
+
+                <p>Verify that curl is not installed:</p>
+
+                <pre><code>➜ candidate@cks7262:~# k -n team-blue exec image-verify-55fbcd4c9b-x2flc -- curl
+error: Internal error occurred: Internal error occurred: error executing command in container: failed to exec in container: failed to start container process: exec: "curl": executable file not found in $PATH: unknown</code></pre>
+
+                <p>Verify nginx version:</p>
+
+                <pre><code>➜ candidate@cks7262:~# k -n team-blue exec image-verify-6cd88b645f-8d5cn -- nginx -v
+nginx version: nginx/1.18.0</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Summary of changes:
+                <ul>
+                  <li>Updated base image to alpine:3.12</li>
+                  <li>Removed curl from installed packages</li>
+                  <li>Updated nginx to version >=1.18.0</li>
+                  <li>Changed process to run as myuser instead of root</li>
+                  <li>Built, tested, and pushed the new image as v2</li>
+                  <li>Updated the Deployment to use the new image</li>
+                </ul>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Security Note: Running containers as non-root users and minimizing the attack surface by removing unnecessary packages are important security best practices in container security.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html> 

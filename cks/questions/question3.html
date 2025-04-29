@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question 3: Apiserver Security - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Highlight.js for code syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .navbar {
+            background-color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+        }
+        .container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+        .back-link:hover {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .back-link i {
+            margin-right: 0.5rem;
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        .solution-step {
+            margin-bottom: 1.5rem;
+        }
+        .solution-step:last-child {
+            margin-bottom: 0;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../cks.html">
+                <i class="fas fa-shield-alt me-2"></i>
+                CKS Practice Questions
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Question Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Question 3: Apiserver Security</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Problem Statement</h5>
+                        <p class="card-text">Solve this question on: <code>ssh cks7262</code></p>
+                        
+                        <p class="card-text">You received a list from the DevSecOps team which performed a security investigation of the cluster. The list states the following about the apiserver setup:</p>
+                        
+                        <ul>
+                            <li>Accessible through a NodePort Service</li>
+                        </ul>
+
+                        <p class="card-text">Change the apiserver setup so that:</p>
+                        <ul>
+                            <li>Only accessible through a ClusterIP Service</li>
+                        </ul>
+
+                        <div class="note">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Use <code>sudo -i</code> to become root which may be required for this question
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solution Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Solution</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="solution-step">
+                            <h5>Step 1: Check Apiserver Configuration</h5>
+                            <pre><code>➜ ssh cks7262
+➜ candidate@cks7262:~# sudo -i
+➜ root@cks7262:~# ps aux | grep kube-apiserver
+root       27622  7.4 15.3 1105924 311788 ?      Ssl  10:31  11:03 kube-apiserver --advertise-address=192.168.100.11 --allow-privileged=true --authorization-mode=Node,RBAC --client-ca-file=/etc/kubernetes/pki/ca.crt --enable-admission-plugins=NodeRestriction --enable-bootstrap-token-auth=true --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key --etcd-servers=https://127.0.0.1:2379 --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --kubernetes-service-node-port=31000 --proxy-client-cert-...</code></pre>
+
+                            <p>Check the current Service type:</p>
+                            <pre><code>➜ root@cks7262:~# k get svc
+NAME         TYPE       CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
+kubernetes   NodePort   10.96.0.1    <none>        443:31000/TCP   5d2h</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 2: Backup and Edit Apiserver Manifest</h5>
+                            <pre><code>➜ root@cks7262:~# cp /etc/kubernetes/manifests/kube-apiserver.yaml ~/3_kube-apiserver.yaml
+➜ root@cks7262:~# vim /etc/kubernetes/manifests/kube-apiserver.yaml</code></pre>
+
+                            <p>Remove the NodePort setting:</p>
+                            <pre><code># /etc/kubernetes/manifests/kube-apiserver.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kubeadm.kubernetes.io/kube-apiserver.advertise-address.endpoint: 192.168.100.11:6443
+  creationTimestamp: null
+  labels:
+    component: kube-apiserver
+    tier: control-plane
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --advertise-address=192.168.100.11
+    - --allow-privileged=true
+    - --authorization-mode=Node,RBAC
+    - --client-ca-file=/etc/kubernetes/pki/ca.crt
+    - --enable-admission-plugins=NodeRestriction
+    - --enable-bootstrap-token-auth=true
+    - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
+    - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+    - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
+    - --etcd-servers=https://127.0.0.1:2379
+    - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
+    - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
+    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+#    - --kubernetes-service-node-port=31000   # delete or set to 0
+    - --proxy-client-cert-file=/etc/kubernetes/pki/front-proxy-client.crt
+    - --proxy-client-key-file=/etc/kubernetes/pki/front-proxy-client.key
+...</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 3: Wait for Apiserver Restart</h5>
+                            <pre><code>➜ root@cks7262:~# watch crictl ps</code></pre>
+
+                            <p>Check the apiserver's Pod status:</p>
+                            <pre><code>➜ root@cks7262:~# k -n kube-system get pod | grep apiserver
+kube-apiserver-cks7262            1/1     Running        0          38s</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 4: Delete and Recreate Service</h5>
+                            <pre><code>➜ root@cks7262:~# k get svc
+NAME         TYPE       CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
+kubernetes   NodePort   10.96.0.1    <none>        443:31000/TCP   5d3h
+
+➜ root@cks7262:~# k delete svc kubernetes
+service "kubernetes" deleted
+
+➜ root@cks7262:~# k get svc
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   6s</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="../cks.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Questions List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="container text-center">
+            <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+</html> 

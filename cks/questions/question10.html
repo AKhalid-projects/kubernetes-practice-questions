@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question 10: Container Runtime Sandbox gVisor - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Highlight.js for code syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .navbar {
+            background-color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+        }
+        .container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+        .back-link:hover {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .back-link i {
+            margin-right: 0.5rem;
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        .solution-step {
+            margin-bottom: 1.5rem;
+        }
+        .solution-step:last-child {
+            margin-bottom: 0;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../cks.html">
+                <i class="fas fa-shield-alt me-2"></i>
+                CKS Practice Questions
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Question Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Question 10: Container Runtime Sandbox gVisor</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Problem Statement</h5>
+                        <p class="card-text">Solve this question on: <code>ssh cks7262</code></p>
+
+                        <p class="card-text">Team purple wants to run some of their workloads more secure. Worker node cks7262-node2 has containerd already configured to support the runsc/gvisor runtime.</p>
+
+                        <p class="card-text">Tasks:</p>
+                        <ol>
+                            <li>Connect to the worker node using <code>ssh cks7262-node2</code> from cks7262</li>
+                            <li>Create a RuntimeClass named gvisor with handler runsc</li>
+                            <li>Create a Pod that uses the RuntimeClass. The Pod should be in Namespace team-purple, named gvisor-test and of image nginx:1.27.1. Ensure the Pod runs on cks7262-node2</li>
+                            <li>Write the output of the dmesg command of the successfully started Pod into /opt/course/10/gvisor-test-dmesg on cks7262</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Solution Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Solution</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="solution-step">
+                            <h5>Step 1: Verify Node Configuration</h5>
+                            <p>First, let's check the nodes and their container runtimes:</p>
+
+                            <pre><code>➜ ssh cks7262
+
+➜ candidate@cks7262:~$ k get node
+NAME                     STATUS   ROLES              ... CONTAINER-RUNTIME
+cks7262                  Ready    control-plane      ... containerd://1.7.12
+cks7262-node1            Ready    <none>             ... containerd://1.7.12
+cks7262-node2            Ready    <none>             ... containerd://1.7.12</code></pre>
+
+                            <p>Let's verify that cks7262-node2 has containerd configured with runsc/gvisor:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ ssh cks7262-node2
+
+➜ candidate@cks7262-node2:~# runsc --version
+runsc version release-20240820.0
+spec: 1.1.0-rc.1
+
+➜ candidate@cks7262-node2:~# cat /etc/containerd/config.toml | grep runsc
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc]
+    runtime_type = "io.containerd.runsc.v1"</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 2: Create RuntimeClass</h5>
+                            <p>Create a RuntimeClass for gVisor:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ vim 10_rtc.yaml
+# 10_rtc.yaml
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: gvisor
+handler: runsc
+
+➜ candidate@cks7262:~$ k -f 10_rtc.yaml create</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 3: Create Pod with RuntimeClass</h5>
+                            <p>Create a Pod that uses the gVisor runtime:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ k -n team-purple run gvisor-test --image=nginx:1.27.1 --dry-run=client -o yaml > 10_pod.yaml
+
+➜ candidate@cks7262:~$ vim 10_pod.yaml
+# 10_pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: gvisor-test
+  name: gvisor-test
+  namespace: team-purple
+spec:
+  nodeName: cks7262-node2 # add
+  runtimeClassName: gvisor   # add
+  containers:
+  - image: nginx:1.27.1
+    name: gvisor-test
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+➜ candidate@cks7262:~$ k -f 10_pod.yaml create</code></pre>
+
+                            <p>Let's verify the Pod is running and using gVisor:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ k -n team-purple get pod gvisor-test
+NAME          READY   STATUS    RESTARTS   AGE
+gvisor-test   1/1     Running   0          30s
+
+➜ candidate@cks7262:~$ k -n team-purple exec gvisor-test -- dmesg
+[    0.000000] Starting gVisor...
+[    0.336731] Waiting for children...
+[    0.807396] Rewriting operating system in Javascript...
+[    0.838661] Committing treasure map to memory...
+[    1.082234] Adversarially training Redcode AI...
+[    1.452222] Synthesizing system calls...
+[    1.751229] Daemonizing children...
+[    2.198949] Verifying that no non-zero bytes made their way into /dev/zero...
+[    2.381878] Singleplexing /dev/ptmx...
+[    2.398376] Checking naughty and nice process list...
+[    2.544323] Creating cloned children...
+[    3.010573] Setting up VFS...
+[    3.467349] Setting up FUSE...
+[    3.738725] Ready!</code></pre>
+                        </div>
+
+                        <div class="solution-step">
+                            <h5>Step 4: Save dmesg Output</h5>
+                            <p>Finally, let's save the dmesg output to the required location:</p>
+
+                            <pre><code>➜ candidate@cks7262:~$ k -n team-purple exec gvisor-test -- dmesg > /opt/course/10/gvisor-test-dmesg</code></pre>
+                        </div>
+
+                        <div class="note">
+                            <i class="fas fa-info-circle me-2"></i>
+                            The gVisor runtime has been successfully implemented:
+                            <ul>
+                                <li>The RuntimeClass has been created with the runsc handler</li>
+                                <li>The Pod has been created with the gVisor runtime</li>
+                                <li>The Pod is running on the correct node</li>
+                                <li>The dmesg output has been saved for verification</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="../cks.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Questions List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="container text-center">
+            <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+    </script>
+</body>
+</html> 

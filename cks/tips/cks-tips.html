@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CKS Tips Kubernetes 1.32 - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .section {
+        margin-bottom: 2rem;
+      }
+      .section:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+      .resource-link {
+        color: #3498db;
+        text-decoration: none;
+      }
+      .resource-link:hover {
+        color: #2980b9;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Knowledge Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Knowledge</h4>
+            </div>
+            <div class="card-body">
+              <div class="section">
+                <h5>Pre-Knowledge</h5>
+                <p>
+                  You should have your CKA knowledge up to date and be
+                  proficient with kubectl. We suggest:
+                </p>
+                <ul>
+                  <li>
+                    Study all scenarios on
+                    <a
+                      href="https://killercoda.com/killer-shell-cka"
+                      class="resource-link"
+                      >Killer Shell CKA</a
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div class="section">
+                <h5>Required Knowledge</h5>
+                <ul>
+                  <li>Study all topics in the curriculum until comfortable</li>
+                  <li>
+                    Practice scenarios on
+                    <a
+                      href="https://killercoda.com/killer-shell-cks"
+                      class="resource-link"
+                      >Killer Shell CKS</a
+                    >
+                  </li>
+                  <li>
+                    Read the
+                    <a
+                      href="https://sysdig.com/resources/kubernetes-security-guide/"
+                      class="resource-link"
+                      >Sysdig Kubernetes Security Guide</a
+                    >
+                  </li>
+                  <li>
+                    Review the
+                    <a
+                      href="https://kubernetes-security.info/book/"
+                      class="resource-link"
+                      >Kubernetes Security book by Liz Rice</a
+                    >
+                  </li>
+                  <li>
+                    Check out the
+                    <a
+                      href="https://cloudsecurityalliance.org/artifacts/cloud-native-security-whitepaper/"
+                      class="resource-link"
+                      >Cloud Native Security Whitepaper</a
+                    >
+                  </li>
+                  <li>
+                    Explore
+                    <a
+                      href="https://github.com/walidshari"
+                      class="resource-link"
+                      >walidshari's repository</a
+                    >
+                    for additional tips and resources
+                  </li>
+                </ul>
+              </div>
+
+              <div class="section">
+                <h5>Key Skills</h5>
+                <ul>
+                  <li>Modifying kube-apiserver in kubeadm setup</li>
+                  <li>Working with AdmissionControllers</li>
+                  <li>Creating and using ImagePolicyWebhook</li>
+                  <li>Using security tools: Falco, Sysdig, Tracee, Trivy</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exam Info Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">CKS Exam Information</h4>
+            </div>
+            <div class="card-body">
+              <div class="section">
+                <h5>Required Reading</h5>
+                <ul>
+                  <li>
+                    <a
+                      href="https://github.com/cncf/curriculum"
+                      class="resource-link"
+                      >CNCF Curriculum</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.linuxfoundation.org/tc-docs/certification/lf-handbook2"
+                      class="resource-link"
+                      >Linux Foundation Handbook</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.linuxfoundation.org/tc-docs/certification/important-instructions-cks"
+                      class="resource-link"
+                      >Important Instructions</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.linuxfoundation.org/tc-docs/certification/faq-cka-ckad-cks"
+                      class="resource-link"
+                      >FAQ</a
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div class="section">
+                <h5>Allowed Documentation</h5>
+                <ul>
+                  <li>
+                    <a href="https://kubernetes.io/docs" class="resource-link"
+                      >Kubernetes Documentation</a
+                    >
+                  </li>
+                  <li>
+                    <a href="https://kubernetes.io/blog" class="resource-link"
+                      >Kubernetes Blog</a
+                    >
+                  </li>
+                  <li>
+                    <a href="https://falco.org/docs" class="resource-link"
+                      >Falco Documentation</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://kubernetes-sigs.github.io/bom/cli-reference"
+                      class="resource-link"
+                      >BOM CLI Reference</a
+                    >
+                  </li>
+                  <li>
+                    <a href="https://etcd.io/docs" class="resource-link"
+                      >etcd Documentation</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration"
+                      class="resource-link"
+                      >Ingress NGINX Configuration</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://docs.cilium.io/en/stable"
+                      class="resource-link"
+                      >Cilium Documentation</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exam Environment Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Exam Environment</h4>
+            </div>
+            <div class="card-body">
+              <div class="section">
+                <h5>PSI Bridge Changes</h5>
+                <ul>
+                  <li>Exam taken using PSI Secure Browser</li>
+                  <li>Multiple monitors no longer permitted</li>
+                  <li>Personal bookmarks not allowed</li>
+                  <li>
+                    Improved features in new ExamUI:
+                    <ul>
+                      <li>Remote desktop with required tools</li>
+                      <li>Timer with remaining time display</li>
+                      <li>Content panel on left side</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="section">
+                <h5>Terminal Tips</h5>
+                <ul>
+                  <li>
+                    Use <code>history</code> command or <code>Ctrl+r</code> for
+                    command history search
+                  </li>
+                  <li>
+                    Use <code>Ctrl+z</code> to background tasks and
+                    <code>fg</code> to bring them back
+                  </li>
+                  <li>
+                    Fast pod deletion:
+                    <code>k delete pod x --grace-period 0 --force</code>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="section">
+                <h5>Vim Configuration</h5>
+                <pre><code>set tabstop=2
+set expandtab
+set shiftwidth=2</code></pre>
+                <p>Useful Vim commands:</p>
+                <ul>
+                  <li>
+                    Toggle line numbers: <code>:set number</code> or
+                    <code>:set nonumber</code>
+                  </li>
+                  <li>Jump to line: <code>:22</code></li>
+                  <li>Mark lines: <code>Esc+V</code> (then arrow keys)</li>
+                  <li>
+                    Copy: <code>y</code>, Cut: <code>d</code>, Paste:
+                    <code>p</code> or <code>P</code>
+                  </li>
+                  <li>
+                    Indent multiple lines: <code>:set shiftwidth=2</code>, then
+                    <code>></code> or <code><</code>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

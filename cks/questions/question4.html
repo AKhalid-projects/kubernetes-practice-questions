@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 4: Pod Security Standard - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 4: Pod Security Standard</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks7262</code>
+              </p>
+
+              <p class="card-text">
+                There is Deployment <code>container-host-hacker</code> in
+                Namespace <code>team-red</code> which mounts
+                <code>/run/containerd</code> as a hostPath volume on the Node
+                where it's running. This means that the Pod can access various
+                data about other containers running on the same Node.
+              </p>
+
+              <p class="card-text">To prevent this:</p>
+              <ol>
+                <li>
+                  Configure Namespace <code>team-red</code> to enforce the
+                  baseline Pod Security Standard.
+                </li>
+                <li>Delete the Pod of the Deployment mentioned above.</li>
+                <li>
+                  Check the ReplicaSet events and write the event/log lines
+                  containing the reason why the Pod isn't recreated into
+                  <code>/opt/course/4/logs</code> on cks7262.
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Configure Pod Security Standard</h5>
+                <p>Edit the Namespace to add the required label:</p>
+                <pre><code>➜ ssh cks7262
+➜ candidate@cks7262:~# k edit ns team-red</code></pre>
+
+                <p>Add the baseline Pod Security Standard label:</p>
+                <pre><code># kubectl edit namespace team-red
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: team-red
+    pod-security.kubernetes.io/enforce: baseline # add
+  name: team-red
+...</code></pre>
+
+                <p>Alternatively, you can set the label using kubectl:</p>
+                <pre><code>kubectl label ns team-red pod-security.kubernetes.io/enforce=baseline</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Delete the Pod</h5>
+                <pre><code>➜ candidate@cks7262:~# k -n team-red get pod
+NAME                                    READY   STATUS    RESTARTS   AGE
+container-host-hacker-dbf989777-wm8fc   1/1     Running   0          115s
+
+➜ candidate@cks7262:~# k -n team-red delete pod container-host-hacker-dbf989777-wm8fc --force --grace-period 0
+pod "container-host-hacker-dbf989777-wm8fc" deleted
+
+➜ candidate@cks7262:~# k -n team-red get pod
+No resources found in team-red namespace.</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Check ReplicaSet Events</h5>
+                <pre><code>➜ candidate@cks7262:~# k -n team-red get rs
+NAME                              DESIRED   CURRENT   READY   AGE
+container-host-hacker-dbf989777   1         0         0       5m25s
+
+➜ candidate@cks7262:~# k -n team-red describe rs container-host-hacker-dbf989777
+Name:           container-host-hacker-dbf989777
+Namespace:      team-red
+...
+Events:
+  Type     Reason            Age                   From                   Message
+  ----     ------            ----                  ----                   -------
+...
+  Warning  FailedCreate  78s                replicaset-controller  Error creating: pods "container-host-hacker-dbf989777-x5v5t" is forbidden: violates PodSecurity "baseline:latest": hostPath volumes (volume "containerdata")
+  Warning  FailedCreate  39s (x7 over 77s)  replicaset-controller  (combined from similar events): Error creating: pods "container-host-hacker-dbf989777-64q6p" is forbidden: violates PodSecurity "baseline:latest": hostPath volumes (volume "containerdata")</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 4: Save the Logs</h5>
+                <pre><code># cks7262:/opt/course/4/logs
+Warning  FailedCreate      2m2s (x9 over 2m40s)  replicaset-controller  (combined from similar events): Error creating: pods "container-host-hacker-dbf989777-kjfpn" is forbidden: violates PodSecurity "baseline:latest": hostPath volumes (volume "containerdata")</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Pod Security Standards provide a great base level of security,
+                but for more granular control, consider using third-party
+                solutions like OPA or Kyverno.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

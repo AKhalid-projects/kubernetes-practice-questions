@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 25: Audit Log Analysis - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 25: Audit Log Analysis</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks3477</code>
+              </p>
+
+              <p class="card-text">
+                Namespace security contains five Secrets of type Opaque which
+                can be considered highly confidential. The latest
+                Incident-Prevention-Investigation revealed that ServiceAccount
+                p.auster had too broad access to the cluster for some time. This
+                SA should never had access to any Secrets in that Namespace.
+              </p>
+
+              <p class="card-text">Tasks:</p>
+              <ol>
+                <li>
+                  Find out which Secrets in Namespace security this SA did
+                  access by looking at the Audit Logs under
+                  /opt/course/p2/audit.log
+                </li>
+                <li>
+                  Change the password to any new string of only those Secrets
+                  that were accessed by this SA
+                </li>
+              </ol>
+
+              <p class="card-text">
+                Note: You can use jq to render json more readable, like
+                <code>cat data.json | jq</code>
+              </p>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Identify the Secrets</h5>
+                <p>
+                  First, let's list the Opaque Secrets in the security
+                  namespace:
+                </p>
+
+                <pre><code>➜ ssh cks3477
+
+➜ candidate@cks3477:~# k -n security get secret | grep Opaque
+kubeadmin-token       Opaque                                1      37m
+mysql-admin           Opaque                                1      37m
+postgres001           Opaque                                1      37m
+postgres002           Opaque                                1      37m
+vault-token           Opaque                                1      37m</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Analyze Audit Logs</h5>
+                <p>Navigate to the audit log directory and check its size:</p>
+
+                <pre><code>➜ candidate@cks3477:~# cd /opt/course/p2
+➜ candidate@cks3477:/opt/course/p2$ ls -lh
+audit.log
+
+➜ candidate@cks3477:/opt/course/p2$ cat audit.log | wc -l
+4448</code></pre>
+
+                <p>Filter logs for ServiceAccount p.auster:</p>
+
+                <pre><code>➜ candidate@cks3477:/opt/course/p2$ cat audit.log | grep "p.auster" | wc -l
+28
+
+➜ candidate@cks3477:/opt/course/p2$ cat audit.log | grep "p.auster" | grep Secret | wc -l
+2</code></pre>
+
+                <p>Check for specific actions:</p>
+
+                <pre><code>➜ candidate@cks3477:/opt/course/p2$ cat audit.log | grep "p.auster" | grep Secret | grep list | wc -l
+0
+
+➜ candidate@cks3477:/opt/course/p2$ cat audit.log | grep "p.auster" | grep Secret | grep get | wc -l
+2</code></pre>
+
+                <p>Examine the specific Secret access events:</p>
+
+                <pre><code>cat audit.log | grep "p.auster" | grep Secret | grep get | jq
+{
+  "kind": "Event",
+  "apiVersion": "audit.k8s.io/v1",
+  "level": "RequestResponse",
+  "auditID": "74fd9e03-abea-4df1-b3d0-9cfeff9ad97a",
+  "stage": "ResponseComplete",
+  "requestURI": "/api/v1/namespaces/security/secrets/vault-token",
+  "verb": "get",
+  "user": {
+    "username": "system:serviceaccount:security:p.auster",
+    "uid": "29ecb107-c0e8-4f2d-816a-b16f4391999c",
+    "groups": [
+      "system:serviceaccounts",
+      "system:serviceaccounts:security",
+      "system:authenticated"
+    ]
+  },
+  "objectRef": {
+    "resource": "secrets",
+    "namespace": "security",
+    "name": "vault-token",
+    "apiVersion": "v1"
+  }
+}
+{
+  "kind": "Event",
+  "apiVersion": "audit.k8s.io/v1",
+  "level": "RequestResponse",
+  "auditID": "aed6caf9-5af0-4872-8f09-ad55974bb5e0",
+  "stage": "ResponseComplete",
+  "requestURI": "/api/v1/namespaces/security/secrets/mysql-admin",
+  "verb": "get",
+  "user": {
+    "username": "system:serviceaccount:security:p.auster",
+    "uid": "29ecb107-c0e8-4f2d-816a-b16f4391999c",
+    "groups": [
+      "system:serviceaccounts",
+      "system:serviceaccounts:security",
+      "system:authenticated"
+    ]
+  },
+  "objectRef": {
+    "resource": "secrets",
+    "namespace": "security",
+    "name": "mysql-admin",
+    "apiVersion": "v1"
+  }
+}</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Update Compromised Secrets</h5>
+                <p>Generate new base64-encoded passwords:</p>
+
+                <pre><code>➜ candidate@cks3477:/opt/course/p2$ echo -n new-vault-pass | base64
+bmV3LXZhdWx0LXBhc3M=
+
+➜ candidate@cks3477:/opt/course/p2$ echo -n new-mysql-pass | base64
+bmV3LW15c3FsLXBhc3M=</code></pre>
+
+                <p>Update the compromised Secrets:</p>
+
+                <pre><code>➜ candidate@cks3477:/opt/course/p2$ k -n security edit secret vault-token
+➜ candidate@cks3477:/opt/course/p2$ k -n security edit secret mysql-admin</code></pre>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Summary of findings:
+                <ul>
+                  <li>Identified 5 Opaque Secrets in the security namespace</li>
+                  <li>
+                    Found 2 Secrets accessed by p.auster: vault-token and
+                    mysql-admin
+                  </li>
+                  <li>Updated passwords for both compromised Secrets</li>
+                </ul>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Security Note: Audit logs can contain sensitive information.
+                It's recommended to configure audit policies to only store
+                metadata-level information for sensitive resources like Secrets,
+                rather than their complete content.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

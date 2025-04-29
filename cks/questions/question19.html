@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Question 19: Immutable Root FileSystem - CKS Practice</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js for code syntax highlighting -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      .container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 1rem;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      code {
+        font-family: "Consolas", "Monaco", monospace;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #3498db;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+      .back-link:hover {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      .back-link i {
+        margin-right: 0.5rem;
+      }
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+      .solution-step {
+        margin-bottom: 1.5rem;
+      }
+      .solution-step:last-child {
+        margin-bottom: 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../cks.html">
+          <i class="fas fa-shield-alt me-2"></i>
+          CKS Practice Questions
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Question Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Question 19: Immutable Root FileSystem</h4>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Problem Statement</h5>
+              <p class="card-text">
+                Solve this question on: <code>ssh cks7262</code>
+              </p>
+
+              <p class="card-text">
+                The Deployment immutable-deployment in Namespace team-purple should run immutable, it's created from file /opt/course/19/immutable-deployment.yaml on cks7262. Even after a successful break-in, it shouldn't be possible for an attacker to modify the filesystem of the running container.
+              </p>
+
+              <p class="card-text">Tasks:</p>
+              <ol>
+                <li>Modify the Deployment in a way that no processes inside the container can modify the local filesystem</li>
+                <li>Only /tmp directory should be writeable</li>
+                <li>Don't modify the Docker image</li>
+                <li>Save the updated YAML under /opt/course/19/immutable-deployment-new.yaml on cks7262</li>
+                <li>Update the running Deployment</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Solution Card -->
+          <div class="card">
+            <div class="card-header">
+              <h4 class="mb-0">Solution</h4>
+            </div>
+            <div class="card-body">
+              <div class="solution-step">
+                <h5>Step 1: Examine Current Deployment</h5>
+                <p>First, let's check the current Deployment configuration:</p>
+
+                <pre><code>➜ ssh cks7262
+
+➜ candidate@cks7262:~# k -n team-purple edit deploy -o yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: team-purple
+  name: immutable-deployment
+  labels:
+    app: immutable-deployment
+  ...
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immutable-deployment
+  template:
+    metadata:
+      labels:
+        app: immutable-deployment
+    spec:
+      containers:
+      - image: busybox:1.32.0
+        command: ['sh', '-c', 'tail -f /dev/null']
+        imagePullPolicy: IfNotPresent
+        name: busybox
+      restartPolicy: Always</code></pre>
+
+                <p>The container currently has write access to the Root File System, as there are no restrictions defined in the SecurityContext.</p>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 2: Create Updated Deployment YAML</h5>
+                <p>Create a copy of the original YAML file and modify it:</p>
+
+                <pre><code>➜ candidate@cks7262:~# cp /opt/course/19/immutable-deployment.yaml /opt/course/19/immutable-deployment-new.yaml
+
+➜ candidate@cks7262:~# vim /opt/course/19/immutable-deployment-new.yaml</code></pre>
+
+                <p>Update the Deployment configuration to make the root filesystem read-only and allow only /tmp to be writable:</p>
+
+                <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: team-purple
+  name: immutable-deployment
+  labels:
+    app: immutable-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immutable-deployment
+  template:
+    metadata:
+      labels:
+        app: immutable-deployment
+    spec:
+      containers:
+      - image: busybox:1.32.0
+        command: ['sh', '-c', 'tail -f /dev/null']
+        imagePullPolicy: IfNotPresent
+        name: busybox
+        securityContext:                  # add
+          readOnlyRootFilesystem: true    # add
+        volumeMounts:                     # add
+        - mountPath: /tmp                 # add
+          name: temp-vol                  # add
+      volumes:                            # add
+      - name: temp-vol                    # add
+        emptyDir: {}                      # add
+      restartPolicy: Always</code></pre>
+
+                <div class="note">
+                  <i class="fas fa-info-circle me-2"></i>
+                  The changes include:
+                  <ul>
+                    <li>Adding a SecurityContext with readOnlyRootFilesystem: true</li>
+                    <li>Adding a volumeMount for /tmp directory</li>
+                    <li>Adding an emptyDir volume for temporary storage</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 3: Apply the Changes</h5>
+                <p>Update the running Deployment with the new configuration:</p>
+
+                <pre><code>➜ candidate@cks7262:~# k delete -f /opt/course/19/immutable-deployment-new.yaml
+deployment.apps "immutable-deployment" deleted
+
+➜ candidate@cks7262:~# k create -f /opt/course/19/immutable-deployment-new.yaml
+deployment.apps/immutable-deployment created</code></pre>
+              </div>
+
+              <div class="solution-step">
+                <h5>Step 4: Verify the Changes</h5>
+                <p>Test the read-only filesystem by attempting to create files in different locations:</p>
+
+                <pre><code>➜ candidate@cks7262:~# k -n team-purple exec immutable-deployment-5f4865fbf-7ckkj -- touch /abc.txt
+touch: /abc.txt: Read-only file system
+command terminated with exit code 1
+
+➜ candidate@cks7262:~# k -n team-purple exec immutable-deployment-5f4865fbf-7ckkj -- touch /var/abc.txt
+touch: /var/abc.txt: Read-only file system
+command terminated with exit code 1
+
+➜ candidate@cks7262:~# k -n team-purple exec immutable-deployment-5f4865fbf-7ckkj -- touch /etc/abc.txt
+touch: /etc/abc.txt: Read-only file system
+command terminated with exit code 1
+
+➜ candidate@cks7262:~# k -n team-purple exec immutable-deployment-5f4865fbf-7ckkj -- touch /tmp/abc.txt
+
+➜ candidate@cks7262:~# k -n team-purple exec immutable-deployment-5f4865fbf-7ckkj -- ls /tmp
+abc.txt</code></pre>
+
+                <p>The tests confirm that:
+                  <ul>
+                    <li>The root filesystem is read-only</li>
+                    <li>Only the /tmp directory is writable</li>
+                    <li>The changes have been successfully applied</li>
+                  </ul>
+                </p>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-info-circle me-2"></i>
+                Summary of changes:
+                <ul>
+                  <li>Made the root filesystem read-only using SecurityContext</li>
+                  <li>Added a writable /tmp directory using emptyDir volume</li>
+                  <li>Updated the Deployment with the new configuration</li>
+                  <li>Verified the changes through testing</li>
+                </ul>
+              </div>
+
+              <div class="note">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Security Note: Making the root filesystem read-only is an important security measure that prevents attackers from modifying system files even if they gain access to the container. This is part of the principle of least privilege and helps maintain container immutability.
+              </div>
+            </div>
+          </div>
+
+          <a href="../cks.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Questions List
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">CKS Practice Questions &copy; 2024</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html> 
